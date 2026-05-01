@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "datashare-frontend-app": {
+    "datashare-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -61,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "datashare-frontend-app:build:production"
+              "buildTarget": "datashare-frontend:build:production"
             },
             "development": {
-              "buildTarget": "datashare-frontend-app:build:development"
+              "buildTarget": "datashare-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
