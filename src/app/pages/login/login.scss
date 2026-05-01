@@ -1,0 +1,22 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.card h1 {
+  margin: 0 0 1rem;
+}
+
+.links {
+  margin-top: 1.5rem;
+}
