@@ -3,6 +3,10 @@
     <h1>Connexion</h1>
     <p class="subtitle">Connectez-vous à votre espace personnel.</p>
 
+    @if (errorMessage) {
+      <p class="error-banner">{{ errorMessage }}</p>
+    }
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
       <div class="form-group">
         <label for="email">Email</label>

@@ -55,3 +55,18 @@ button {
   margin-top: 1.5rem;
   text-align: center;
 }
+
+.success,
+.error-banner {
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.error-banner,
+.error {
+  color: #b00020;
+}
+
+.success {
+  color: #0a7a2f;
+}
