@@ -1,0 +1,55 @@
+<main class="page">
+  <section class="card">
+    <h1>Créer un compte</h1>
+    <p class="subtitle">Renseignez votre email et votre mot de passe.</p>
+
+    @if (successMessage) {
+      <p class="success">{{ successMessage }}</p>
+    }
+
+    @if (errorMessage) {
+      <p class="error-banner">{{ errorMessage }}</p>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" />
+
+        @if (submitted && form.email.errors) {
+          <div class="error">
+            @if (form.email.errors['required']) {
+              <span>L’email est obligatoire.</span>
+            }
+            @if (form.email.errors['email']) {
+              <span>Le format de l’email est invalide.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" formControlName="password" />
+
+        @if (submitted && form.password.errors) {
+          <div class="error">
+            @if (form.password.errors['required']) {
+              <span>Le mot de passe est obligatoire.</span>
+            }
+            @if (form.password.errors['minlength']) {
+              <span>Le mot de passe doit contenir au moins 8 caractères.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <button type="submit">Créer mon compte</button>
+    </form>
+
+    <p class="links">
+      Déjà un compte ?
+      <a routerLink="/login">Se connecter</a>
+    </p>
+  </section>
+</main>
