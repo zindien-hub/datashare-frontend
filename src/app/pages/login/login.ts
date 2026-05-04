@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/service/auth.service';
 
 @Component({
@@ -14,6 +14,7 @@ import { AuthService } from '../../core/service/auth.service';
 export class Login {
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   submitted = false;
   errorMessage = '';
@@ -45,10 +46,7 @@ export class Login {
     }).subscribe({
       next: (response) => {
         this.authService.saveToken(response.token);
-
-        // TODO: rediriger l'utilisateur vers une page protégée (/upload ou /history)
-        // une fois les écrans métier et le guard implémentés.
-        console.log('Connexion réussie, redirection à implémenter.');
+        this.router.navigate(['/upload']);
       },
       error: (error) => {
         this.errorMessage = error?.error?.message || 'Erreur lors de la connexion.';
