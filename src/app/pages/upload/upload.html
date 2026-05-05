@@ -1,6 +1,50 @@
 <main class="page">
   <section class="card">
-    <h1>Upload</h1>
-    <p>Page protégée accessible après connexion.</p>
+    <div class="header">
+      <h1>Upload de fichier</h1>
+      <button type="button" class="logout-button" (click)="onLogout()">
+        Se déconnecter
+      </button>
+    </div>
+
+    <p class="subtitle">Sélectionnez un fichier à partager.</p>
+
+    @if (successMessage) {
+      <p class="success-banner">{{ successMessage }}</p>
+    }
+
+    @if (errorMessage) {
+      <p class="error-banner">{{ errorMessage }}</p>
+    }
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="file">Fichier</label>
+        <input id="file" type="file" (change)="onFileSelected($event)" />
+      </div>
+
+      @if (selectedFile) {
+        <p class="selected-file">
+          Fichier sélectionné : <strong>{{ selectedFile.name }}</strong>
+        </p>
+      }
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Upload en cours...' : 'Envoyer le fichier' }}
+      </button>
+    </form>
+
+    @if (uploadResponse) {
+      <section class="result">
+        <h2>Upload réussi</h2>
+        <p><strong>Nom :</strong> {{ uploadResponse.originalName }}</p>
+        <p><strong>Token :</strong> {{ uploadResponse.downloadToken }}</p>
+        <p><strong>Lien :</strong> {{ uploadResponse.downloadUrl }}</p>
+        <p>
+          <strong>Expiration :</strong>
+          {{ uploadResponse.expiresAt | date:'medium' }}
+        </p>
+      </section>
+    }
   </section>
 </main>
