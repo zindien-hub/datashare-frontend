@@ -1,0 +1,39 @@
+<main class="page">
+  <section class="card">
+    <div class="header">
+      <h1>Historique des fichiers</h1>
+      <button type="button" class="logout-button" (click)="onLogout()">
+        Se déconnecter
+      </button>
+    </div>
+
+    <p *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</p>
+
+    <p *ngIf="isLoading">Chargement...</p>
+
+    <p *ngIf="!isLoading && files.length === 0">
+      Aucun fichier envoyé pour le moment.
+    </p>
+
+    <table *ngIf="!isLoading && files.length > 0">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Type</th>
+          <th>Taille</th>
+          <th>Créé le</th>
+          <th>Expiration</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of files">
+          <td>{{ file.originalName }}</td>
+          <td>{{ file.contentType || 'n/a' }}</td>
+          <td>{{ file.size }} octets</td>
+          <td>{{ file.createdAt | date:'short' }}</td>
+          <td>{{ file.expiresAt | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
