@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { FileUploadResponse } from '../models/file-upload-response.model';
+import { FileListItemResponse } from '../models/file-list-item-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,5 +18,10 @@ export class FileService {
     formData.append('file', file);
 
     return this.http.post<FileUploadResponse>(this.apiUrl, formData);
+  }
+
+  // Récupère l'historique des fichiers de l'utilisateur connecté.
+  getMyFiles(): Observable<FileListItemResponse[]> {
+    return this.http.get<FileListItemResponse[]>(this.apiUrl);
   }
 }

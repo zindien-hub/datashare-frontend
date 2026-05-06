@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { FileService } from '../../core/service/file.service';
@@ -9,7 +9,7 @@ import { FileUploadResponse } from '../../core/models/file-upload-response.model
 
 @Component({
   selector: 'app-upload',
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './upload.html',
   styleUrl: './upload.scss'
 })
