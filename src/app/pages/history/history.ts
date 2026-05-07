@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { FileService } from '../../core/service/file.service';
 import { AuthService } from '../../core/service/auth.service';
 import { FileListItemResponse } from '../../core/models/file-list-item-response.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-history',
@@ -54,5 +55,9 @@ export class History implements OnInit {
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  buildDownloadLink(downloadUrl: string): string {
+    return `${environment.backendBaseUrl}${downloadUrl}`;
   }
 }
