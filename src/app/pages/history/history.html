@@ -23,6 +23,7 @@
           <th>Taille</th>
           <th>Créé le</th>
           <th>Expiration</th>
+          <th>Téléchargement</th>
         </tr>
       </thead>
       <tbody>
@@ -32,6 +33,11 @@
           <td>{{ file.size }} octets</td>
           <td>{{ file.createdAt | date:'short' }}</td>
           <td>{{ file.expiresAt | date:'short' }}</td>
+          <td>
+            <a [href]="buildDownloadLink(file.downloadUrl)" target="_blank" rel="noopener">
+              Télécharger
+            </a>
+          </td>
         </tr>
       </tbody>
     </table>
