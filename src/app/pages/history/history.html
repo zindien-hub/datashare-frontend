@@ -7,39 +7,53 @@
       </button>
     </div>
 
-    <p *ngIf="errorMessage" class="error-banner">{{ errorMessage }}</p>
+    @if (successMessage) {
+      <p class="success-banner">{{ successMessage }}</p>
+    }
 
-    <p *ngIf="isLoading">Chargement...</p>
+    @if (errorMessage) {
+      <p class="error-banner">{{ errorMessage }}</p>
+    }
 
-    <p *ngIf="!isLoading && files.length === 0">
-      Aucun fichier envoyé pour le moment.
-    </p>
-
-    <table *ngIf="!isLoading && files.length > 0">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Type</th>
-          <th>Taille</th>
-          <th>Créé le</th>
-          <th>Expiration</th>
-          <th>Téléchargement</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let file of files">
-          <td>{{ file.originalName }}</td>
-          <td>{{ file.contentType || 'n/a' }}</td>
-          <td>{{ file.size }} octets</td>
-          <td>{{ file.createdAt | date:'short' }}</td>
-          <td>{{ file.expiresAt | date:'short' }}</td>
-          <td>
-            <a [href]="buildDownloadLink(file.downloadUrl)" target="_blank" rel="noopener">
-              Télécharger
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    @if (isLoading) {
+      <p>Chargement...</p>
+    } @else if (files.length === 0) {
+      <p>Aucun fichier envoyé pour le moment.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Taille</th>
+            <th>Créé le</th>
+            <th>Expiration</th>
+            <th>Téléchargement</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (file of files; track file.id) {
+            <tr>
+              <td>{{ file.originalName }}</td>
+              <td>{{ file.contentType || 'n/a' }}</td>
+              <td>{{ file.size }} octets</td>
+              <td>{{ file.createdAt | date:'short' }}</td>
+              <td>{{ file.expiresAt | date:'short' }}</td>
+              <td>
+                <a [href]="buildDownloadLink(file.downloadUrl)" target="_blank" rel="noopener">
+                  Télécharger
+                </a>
+              </td>
+              <td>
+                <button type="button" (click)="deleteFile(file.id)">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </section>
 </main>

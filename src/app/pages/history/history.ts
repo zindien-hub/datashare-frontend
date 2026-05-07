@@ -22,6 +22,7 @@ export class History implements OnInit {
 
   files: FileListItemResponse[] = [];
   errorMessage = '';
+  successMessage = '';
   isLoading = true;
 
   ngOnInit(): void {
@@ -59,5 +60,22 @@ export class History implements OnInit {
 
   buildDownloadLink(downloadUrl: string): string {
     return `${environment.backendBaseUrl}${downloadUrl}`;
+  }
+
+  // Supprime un fichier puis recharge l'historique.
+  deleteFile(id: number): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.fileService.deleteFile(id).subscribe({
+      next: () => {
+        this.successMessage = 'Fichier supprimé avec succès.';
+        this.loadFiles();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Erreur lors de la suppression du fichier.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
