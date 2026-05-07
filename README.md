@@ -1,59 +1,148 @@
-# DataShare
+# DataShare Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Frontend Angular de l’application DataShare.
 
-## Development server
+## Description
 
-To start a local development server, run:
+Cette application permet à un utilisateur de :
+
+- créer un compte ;
+- se connecter ;
+- uploader un fichier ;
+- consulter l’historique de ses fichiers ;
+- télécharger un fichier via un lien public ;
+- supprimer un fichier depuis l’historique.
+
+Le frontend communique avec le backend Spring Boot via des endpoints REST.
+
+## Stack technique
+
+- Angular 21
+- TypeScript
+- SCSS
+- Angular Router
+- HttpClient
+- Proxy Angular en développement
+
+## Pré-requis
+
+- Node.js
+- npm
+- Angular CLI
+- backend DataShare démarré sur `http://localhost:8080`
+
+## Configuration
+
+Le frontend utilise un proxy Angular en développement pour rediriger les appels API vers le backend.
+
+Fichier concerné :
+
+```text
+proxy.conf.json
+```
+
+Le proxy redirige notamment :
+
+`/api/**`
+`/download/**` si nécessaire selon le flux utilisé
+
+L’URL backend utilisée pour les liens de téléchargement est configurée dans :
+
+```bash
+src/environments/environment.ts
+```
+
+Exemple :
+
+```bash
+export const environment = {
+  backendBaseUrl: 'http://localhost:8080'
+};
+```
+
+## Démarrage en local
+
+Installer les dépendances :
+
+```bash
+npm install
+```
+
+Lancer le serveur de développement :
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+L’application est ensuite disponible sur : `http://localhost:4200`
 
-## Code scaffolding
+## Fonctionnalités implémentées
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Authentification
+
+- page d’inscription;
+- page de connexion;
+- stockage du JWT dans le navigateur;
+- protection des routes authentifiées;
+- ajout automatique du header `Authorization` via un interceptor.
+
+### Gestion des fichiers
+
+- upload de fichier pour l’utilisateur connecté;
+- historique des fichiers envoyés;
+- téléchargement via un lien public;
+- suppression d’un fichier depuis l’historique.
+
+## Routes principales
+
+- `/login`
+- `/register`
+- `/upload`
+- `/history`
+
+## Sécurité côté frontend
+
+- garde de route (`AuthGuard`) pour les pages protégées ;
+- interceptor HTTP pour injecter le JWT ;
+- déconnexion utilisateur ;
+- redirection vers la page de connexion si l’utilisateur n’est pas authentifié.
+
+## Structure du projet
 
 ```bash
-ng generate component component-name
+src/app/
+  core/
+    guard/
+    interceptor/
+    models/
+    service/
+  pages/
+    login/
+    register/
+    upload/
+    history/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Build
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Créer un build de production :
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Les fichiers générés sont produits dans le dossier `dist/`.
 
-## Running unit tests
+## Tests
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Lancer les tests unitaires :
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+## Notes
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- le frontend dépend du backend DataShare pour les fonctionnalités métier ;
+- les liens de téléchargement sont construits à partir de la configuration d’environnement ;
+- certaines mises à jour de vue après chargement asynchrone ont nécessité une détection explicite dans certains composants pour stabiliser le MVP.
