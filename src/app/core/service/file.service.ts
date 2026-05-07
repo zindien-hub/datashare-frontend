@@ -24,4 +24,8 @@ export class FileService {
   getMyFiles(): Observable<FileListItemResponse[]> {
     return this.http.get<FileListItemResponse[]>(this.apiUrl);
   }
+
+  deleteFile(id: number) {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }
