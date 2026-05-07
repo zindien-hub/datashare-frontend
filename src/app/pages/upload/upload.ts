@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 
 import { FileService } from '../../core/service/file.service';
 import { AuthService } from '../../core/service/auth.service';
@@ -17,6 +18,7 @@ export class Upload {
   private fileService = inject(FileService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   selectedFile: File | null = null;
   errorMessage = '';
@@ -32,35 +34,48 @@ export class Upload {
     this.selectedFile = file;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.detectChanges();
   }
 
   // Envoie le fichier sélectionné au backend.
-  onSubmit(): void {
-    console.log('onSubmit déclenché');
+  onSubmit(fileInput?: HTMLInputElement): void {
     this.errorMessage = '';
     this.successMessage = '';
     this.uploadResponse = null;
 
     if (!this.selectedFile) {
       this.errorMessage = 'Veuillez sélectionner un fichier.';
+      this.cdr.detectChanges();
       return;
     }
 
     this.isSubmitting = true;
+    this.cdr.detectChanges();
 
-    this.fileService.upload(this.selectedFile).subscribe({
-      next: (response) => {
-        console.log('Upload OK', response);
-        this.uploadResponse = response;
-        this.successMessage = 'Fichier uploadé avec succès.';
-        this.isSubmitting = false;
-      },
-      error: (error) => {
-        console.error('Upload KO', error);
-        this.errorMessage = error?.error?.message || 'Erreur lors de l’upload du fichier.';
-        this.isSubmitting = false;
-      }
-    });
+    this.fileService.upload(this.selectedFile)
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.uploadResponse = response;
+          this.successMessage = 'Fichier uploadé avec succès.';
+          this.selectedFile = null;
+
+          if (fileInput) {
+            fileInput.value = '';
+          }
+
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = error?.error?.message || 'Erreur lors de l’upload du fichier.';
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   onLogout(): void {
