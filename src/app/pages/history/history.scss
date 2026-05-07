@@ -26,6 +26,11 @@
   color: #b00020;
 }
 
+.success-banner {
+  margin: 0 0 1rem;
+  color: #0a7a2f;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -36,9 +41,4 @@ td {
   padding: 0.75rem;
   border: 1px solid #ddd;
   text-align: left;
-}
-
-.success-banner {
-  margin: 0 0 1rem;
-  color: #0a7a2f;
 }

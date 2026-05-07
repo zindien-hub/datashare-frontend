@@ -53,16 +53,6 @@ export class History implements OnInit {
       });
   }
 
-  onLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-
-  buildDownloadLink(downloadUrl: string): string {
-    return `${environment.backendBaseUrl}${downloadUrl}`;
-  }
-
-  // Supprime un fichier puis recharge l'historique.
   deleteFile(id: number): void {
     this.errorMessage = '';
     this.successMessage = '';
@@ -77,5 +67,14 @@ export class History implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  buildDownloadLink(downloadUrl: string): string {
+    return `${environment.backendBaseUrl}${downloadUrl}`;
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
