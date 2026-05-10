@@ -1,10 +1,18 @@
 <main class="page">
   <section class="card">
+    <!-- Header avec bouton retour à l'upload -->
     <div class="header">
       <h1>Historique des fichiers</h1>
-      <button type="button" class="logout-button" (click)="onLogout()">
-        Se déconnecter
-      </button>
+      <div class="header-buttons">
+        <!-- Bouton "Retour à l'upload" -->
+        <button type="button" class="back-upload-button" (click)="goToUpload()" title="Retourner à la page d'upload">
+          Retour à l'upload
+        </button>
+        <!-- Bouton "Se déconnecter" -->
+        <button type="button" class="logout-button" (click)="onLogout()"  title="Se déconnecter de votre compte">
+          Se déconnecter
+        </button>
+      </div>
     </div>
 
     @if (successMessage) {
@@ -29,6 +37,8 @@
             <th>Créé le</th>
             <th>Expiration</th>
             <th>Téléchargement</th>
+            <!-- Colonne "Copier le lien" -->
+            <th>Copier le lien</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -45,8 +55,14 @@
                   Télécharger
                 </a>
               </td>
+              <!-- Bouton "Copier le lien" pour chaque fichier -->
               <td>
-                <button type="button" (click)="deleteFile(file.id)">
+                <button type="button" class="copy-link-button" (click)="copyLinkToClipboard(file.downloadUrl)" title="Copier le lien de téléchargement">
+                  Copier
+                </button>
+              </td>
+              <td>
+                <button type="button" class="delete-button" (click)="deleteFile(file.id)" title="Supprimer ce fichier">
                   Supprimer
                 </button>
               </td>
