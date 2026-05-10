@@ -6,10 +6,10 @@
       <div class="header-buttons">
         <!-- Bouton "Retour à l'upload" -->
         <button type="button" class="back-upload-button" (click)="goToUpload()" title="Retourner à la page d'upload">
-          ← Retour à l'upload
+          Retour à l'upload
         </button>
         <!-- Bouton "Se déconnecter" -->
-        <button type="button" class="logout-button" (click)="onLogout()">
+        <button type="button" class="logout-button" (click)="onLogout()"  title="Se déconnecter de votre compte">
           Se déconnecter
         </button>
       </div>
@@ -58,11 +58,11 @@
               <!-- Bouton "Copier le lien" pour chaque fichier -->
               <td>
                 <button type="button" class="copy-link-button" (click)="copyLinkToClipboard(file.downloadUrl)" title="Copier le lien de téléchargement">
-                  📋 Copier
+                  Copier
                 </button>
               </td>
               <td>
-                <button type="button" (click)="deleteFile(file.id)">
+                <button type="button" class="delete-button" (click)="deleteFile(file.id)" title="Supprimer ce fichier">
                   Supprimer
                 </button>
               </td>

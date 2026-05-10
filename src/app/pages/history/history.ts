@@ -32,23 +32,23 @@ export class History implements OnInit {
   loadFiles(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    this.cdr.detectChanges(); // Force la mise à jour de la vue pour afficher le spinner de chargement
+    this.cdr.detectChanges();
 
     this.fileService.getMyFiles()
       .pipe(
         finalize(() => {
           this.isLoading = false;
-          this.cdr.detectChanges(); // Force la mise à jour de la vue après la fin du chargement
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (response) => {
           this.files = Array.isArray(response) ? response : [];
-          this.cdr.detectChanges(); // Force la mise à jour de la vue après avoir reçu les données
+          this.cdr.detectChanges();
         },
         error: (error) => {
           this.errorMessage = error?.error?.message || 'Erreur lors du chargement de l’historique.';
-          this.cdr.detectChanges(); // Force la mise à jour de la vue en cas d'erreur
+          this.cdr.detectChanges();
         }
       });
   }
@@ -81,13 +81,20 @@ export class History implements OnInit {
   // Copier le lien du fichier dans le presse-papiers
   copyLinkToClipboard(downloadUrl: string): void {
     const fullLink = this.buildDownloadLink(downloadUrl);
-    
+
+    if (!navigator.clipboard) {
+      this.errorMessage = 'Copie non supportée sur ce navigateur.';
+      this.successMessage = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
     navigator.clipboard.writeText(fullLink).then(() => {
       // Affichage du message de succès
       this.successMessage = 'Lien copié avec succès!';
       this.errorMessage = '';
       this.cdr.detectChanges();
-      
+
       // Effacer le message après 3 secondes
       setTimeout(() => {
         this.successMessage = '';
@@ -98,7 +105,7 @@ export class History implements OnInit {
       this.errorMessage = 'Erreur lors de la copie du lien.';
       this.successMessage = '';
       this.cdr.detectChanges();
-      
+
       // Effacer le message après 3 secondes
       setTimeout(() => {
         this.errorMessage = '';
