@@ -73,6 +73,40 @@ export class History implements OnInit {
     return `${environment.backendBaseUrl}${downloadUrl}`;
   }
 
+  // Retour à la page upload
+  goToUpload(): void {
+    this.router.navigate(['/upload']);
+  }
+
+  // Copier le lien du fichier dans le presse-papiers
+  copyLinkToClipboard(downloadUrl: string): void {
+    const fullLink = this.buildDownloadLink(downloadUrl);
+    
+    navigator.clipboard.writeText(fullLink).then(() => {
+      // Affichage du message de succès
+      this.successMessage = 'Lien copié avec succès!';
+      this.errorMessage = '';
+      this.cdr.detectChanges();
+      
+      // Effacer le message après 3 secondes
+      setTimeout(() => {
+        this.successMessage = '';
+        this.cdr.detectChanges();
+      }, 3000);
+    }).catch(() => {
+      // Affichage du message d'erreur
+      this.errorMessage = 'Erreur lors de la copie du lien.';
+      this.successMessage = '';
+      this.cdr.detectChanges();
+      
+      // Effacer le message après 3 secondes
+      setTimeout(() => {
+        this.errorMessage = '';
+        this.cdr.detectChanges();
+      }, 3000);
+    });
+  }
+
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
