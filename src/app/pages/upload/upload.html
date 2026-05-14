@@ -10,15 +10,16 @@
     <p class="history-link">
       <a routerLink="/history">Voir l’historique des fichiers</a>
     </p>
-    
+
     <p class="subtitle">Sélectionnez un fichier à partager.</p>
 
-    @if (successMessage) {
-      <p class="success-banner">{{ successMessage }}</p>
+    @if (successMessage()) {
+    <p class="success-banner">{{ successMessage() }}</p>
     }
 
-    @if (errorMessage) {
-      <p class="error-banner">{{ errorMessage }}</p>
+
+    @if (errorMessage()) {
+    <p class="error-banner">{{ errorMessage() }}</p>
     }
 
     <form (ngSubmit)="onSubmit()">
@@ -27,28 +28,28 @@
         <input id="file" type="file" (change)="onFileSelected($event)" />
       </div>
 
-      @if (selectedFile) {
-        <p class="selected-file">
-          Fichier sélectionné : <strong>{{ selectedFile.name }}</strong>
-        </p>
+      @if (selectedFile()) {
+      <p class="selected-file">
+        Fichier sélectionné : <strong>{{ selectedFile()!.name }}</strong>
+      </p>
       }
 
-      <button type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Upload en cours...' : 'Envoyer le fichier' }}
+      <button type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Upload en cours...' : 'Envoyer le fichier' }}
       </button>
     </form>
 
-    @if (uploadResponse) {
-      <section class="result">
-        <h2>Upload réussi</h2>
-        <p><strong>Nom :</strong> {{ uploadResponse.originalName }}</p>
-        <p><strong>Token :</strong> {{ uploadResponse.downloadToken }}</p>
-        <p><strong>Lien :</strong> {{ uploadResponse.downloadUrl }}</p>
-        <p>
-          <strong>Expiration :</strong>
-          {{ uploadResponse.expiresAt | date:'medium' }}
-        </p>
-      </section>
+    @if (uploadResponse()) {
+    <section class="result">
+      <h2>Upload réussi</h2>
+      <p><strong>Nom :</strong> {{ uploadResponse()!.originalName }}</p>
+      <p><strong>Token :</strong> {{ uploadResponse()!.downloadToken }}</p>
+      <p><strong>Lien :</strong> {{ uploadResponse()!.downloadUrl }}</p>
+      <p>
+        <strong>Expiration :</strong>
+        {{ uploadResponse()!.expiresAt | date:'medium' }}
+      </p>
+    </section>
     }
   </section>
 </main>
