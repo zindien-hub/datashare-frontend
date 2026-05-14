@@ -1,14 +1,36 @@
 import { Routes } from '@angular/router';
-import { Login } from './pages/login/login';
-import { Register } from './pages/register/register';
-import { Upload } from './pages/upload/upload';
 import { authGuard } from './core/guard/auth.guard';
-import { History } from './pages/history/history';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: Login },
-  { path: 'register', component: Register },
-  { path: 'upload', component: Upload, canActivate: [authGuard] },
-  { path: 'history', component: History, canActivate: [authGuard] }
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./pages/login/login').then(m => m.Login)
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/register/register').then(m => m.Register)
+  },
+  {
+    path: 'upload',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/upload/upload').then(m => m.Upload)
+  },
+  {
+    path: 'history',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/history/history').then(m => m.History)
+  },
+  {
+    path: '**',
+    redirectTo: 'login'
+  }
 ];
