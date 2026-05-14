@@ -2,72 +2,199 @@
 
 ## Objectif
 
-Ce document décrit les premiers éléments de performance observés sur le frontend Angular de DataShare.
+Ce document décrit les principaux éléments de performance observés sur le frontend Angular de DataShare.
 
-L’objectif est de documenter l’état actuel du build frontend et de vérifier que le MVP reste léger et exploitable dans un contexte de démonstration.
+L’objectif est d’évaluer le comportement du frontend dans un contexte de démonstration, à partir :
+- du build de production ;
+- d’une optimisation du routage par lazy loading ;
+- d’audits Lighthouse sur les pages principales de l’application.
 
 ## Méthode utilisée
 
-La mesure a été réalisée à partir du build de production Angular avec la commande :
+Trois types de mesures ont été retenus :
+
+- build Angular avec `ng build`
+- comparaison avant / après mise en place du lazy loading par page
+- audits Lighthouse réalisés manuellement dans Chrome DevTools sur :
+  - `/login`
+  - `/upload`
+  - `/history`
+
+## Résultats du build
+
+### Avant optimisation du routage
 
 ```bash
-ng build
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+main-HNE2YTYA.js    | main          | 301.15 kB |                78.28 kB
+styles-5INURTSO.css | styles        |   0 bytes |                 0 bytes
+
+                    | Initial total | 301.15 kB |                78.28 kB
 ```
 
-Cette étape permet d’obtenir :
+### Après mise en place du lazy loading
+```bash
+Initial chunk files | Names         |  Raw size | Estimated transfer size
+chunk-LLJM4F2C.js   | -             | 247.36 kB |                67.83 kB
+main-O6S4LW6F.js    | main          |   1.53 kB |               689 bytes
+styles-5INURTSO.css | styles        |   0 bytes |                 0 bytes
 
-- la taille du bundle principal ;
-- la taille totale des ressources initiales ;
-- une estimation de la taille transférée au navigateur.
+                    | Initial total | 248.90 kB |                68.52 kB
 
-## Résultats observés
+Lazy chunk files    | Names         |  Raw size | Estimated transfer size
+chunk-LVXKMLHM.js   | history       |   5.76 kB |                 1.99 kB
+chunk-UU5WDILA.js   | upload        |   4.65 kB |                 1.65 kB
+chunk-6FEH4OUJ.js   | register      |   4.10 kB |                 1.43 kB
+chunk-X4G6WJQS.js   | login         |   3.58 kB |                 1.32 kB
+```
 
-### Build frontend
+## Résultat observé :
 
-Résultat obtenu :
+total initial : 248.90 kB
+taille estimée transférée : 68.52 kB
+le bundle principal main est réduit à 1.53 kB
+les pages sont désormais chargées à la demande sous forme de chunks séparés
+Lazy chunks observés
+history : 5.76 kB
+upload : 4.65 kB
+register : 4.10 kB
+login : 3.58 kB
 
-- bundle principal `main` : 299.29 kB
-- taille estimée transférée : 77.83 kB
-- fichier `styles` : 0 byte
-- total initial : 299.29 kB
-- temps de génération du bundle : 2.978 secondes
+## Effet observé
 
-### Lecture des résultats
+Le passage au lazy loading par page a permis :
+
+- de réduire le bundle initial de 301.15 kB à 248.90 kB
+- de réduire le transfert estimé de 78.28 kB à 68.52 kB
+- de mieux répartir le chargement du frontend entre les différentes routes
+
+## Résultats Lighthouse
+
+Les audits Lighthouse ont été réalisés manuellement depuis Chrome DevTools sur les principales pages de l’application.
+
+### Profils Desktop
+
+#### Page `/login`
+- Performance : **82**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **1.4 s**
+- Largest Contentful Paint : **2.4 s**
+- Total Blocking Time : **0 ms**
+- Speed Index : **1.4 s**
+
+#### Page `/register`
+- Performance : **84**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **1.4 s**
+- Largest Contentful Paint : **2.3 s**
+- Total Blocking Time : **0 ms**
+- Speed Index : **1.4 s**
+
+#### Page `/upload`
+- Performance : **82**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **1.4 s**
+- Largest Contentful Paint : **2.4 s**
+- Total Blocking Time : **0 ms**
+- Speed Index : **1.4 s**
+
+#### Page `/history`
+- Performance : **85**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **1.3 s**
+- Largest Contentful Paint : **2.2 s**
+- Total Blocking Time : **0 ms**
+- Speed Index : **1.3 s**
+
+### Profils Mobile
+
+#### Page `/login`
+- Performance : **58**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **7.5 s**
+- Largest Contentful Paint : **13.1 s**
+- Total Blocking Time : **30 ms**
+- Speed Index : **7.5 s**
+
+#### Page `/register`
+- Performance : **58**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **7.5 s**
+- Largest Contentful Paint : **13.1 s**
+- Total Blocking Time : **30 ms**
+- Speed Index : **7.5 s**
+
+#### Page `/upload`
+- Performance : **57**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **7.7 s**
+- Largest Contentful Paint : **13.4 s**
+- Total Blocking Time : **40 ms**
+- Speed Index : **7.7 s**
+
+#### Page `/history`
+- Performance : **58**
+- Accessibility : **100**
+- Best Practices : **100**
+- SEO : **90**
+- First Contentful Paint : **7.3 s**
+- Largest Contentful Paint : **12.6 s**
+- Total Blocking Time : **40 ms**
+- Speed Index : **7.3 s**
 
 Ces résultats montrent que :
 
-- le frontend reste relativement léger pour un MVP ;
-- le chargement initial est concentré sur un bundle principal unique ;
-- la taille estimée transférée reste modérée ;
-- le build de production se génère rapidement dans l’environnement local.
+- le frontend reste léger pour un MVP ;
+- le lazy loading a permis d’alléger le chargement initial ;
+- les pages testées présentent un comportement cohérent ;
+- en profil desktop, le thread principal n’est pas bloqué de manière significative (`TBT = 0 ms`) ;
+- les scores Lighthouse desktop sont bons, avec une performance comprise entre **82 et 85** ;
+- les scores Lighthouse mobile sont plus faibles, compris entre **57 et 58**, avec des temps de rendu sensiblement plus élevés ;
+- les ajustements responsive ont amélioré l’exploitabilité de l’interface sur petits écrans, en particulier sur la page `history`.
 
 ## Interprétation
 
 À ce stade du projet :
 
-- le frontend présente un poids compatible avec un prototype de démonstration ;
-- la structure reste simple, sans multiplication excessive des bundles ;
-- aucune alerte bloquante n’a été relevée lors du build observé.
+- le frontend présente un poids compatible avec une démonstration ;
+- la structure du routage a été améliorée avec un chargement à la demande ;
+- l’expérience desktop apparaît satisfaisante sur les pages principales ;
+- l’interface mobile est désormais plus cohérente visuellement, mais les audits Lighthouse montrent que la performance mobile reste une marge d’amélioration ;
+- aucune alerte bloquante n’a été relevée, mais un écart net subsiste entre les profils desktop et mobile.
 
-Le budget de performance n’a pas été dépassé sur ce build.
+Le frontend apparaît donc adapté au périmètre actuel du MVP, avec une base saine côté desktop et une marge d’optimisation encore réelle côté mobile.
 
 ## Limites actuelles
 
 Les mesures actuelles restent limitées :
 
-- absence de campagne Lighthouse complète ;
-- absence de comparaison entre plusieurs versions du build ;
-- absence de mesure en conditions réseau simulées ;
-- absence de suivi détaillé des Web Vitals.
+- audits réalisés en environnement local ;
+- absence d’automatisation Lighthouse complète sur les routes protégées ;
+- comparaison réalisée via les profils Lighthouse desktop et mobile, mais sans campagne sur plusieurs appareils physiques ;
+- absence de suivi détaillé des Web Vitals dans le temps.
 
-Ces résultats doivent donc être interprétés comme une première photographie technique du frontend, et non comme un audit de performance complet.
+Ces résultats doivent donc être interprétés comme une évaluation locale sérieuse du frontend, et non comme un audit de performance complet en conditions réelles de production.
 
 ## Optimisations et approfondissements possibles
 
 Les améliorations envisagées sont :
 
-- mesurer les performances avec Lighthouse ;
-- suivre les Core Web Vitals ;
-- surveiller l’évolution de la taille du bundle au fil des fonctionnalités ajoutées ;
-- envisager du lazy loading si le frontend grossit davantage ;
-- mieux répartir les ressources statiques si le projet évolue vers une version plus riche.
+- surveiller l’évolution de la taille du bundle dans le temps ;
+- approfondir l’optimisation des performances mobiles ;
+- suivre plus systématiquement les Core Web Vitals ;
+- conserver le lazy loading comme base de croissance du frontend ;
+- réévaluer la stratégie de découpage si le nombre de pages ou de composants augmente.

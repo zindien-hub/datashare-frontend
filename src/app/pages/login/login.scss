@@ -65,3 +65,38 @@ button {
   margin: 0 0 1rem;
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card h1 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  input,
+  button {
+    padding: 0.7rem;
+  }
+
+  .links {
+    font-size: 0.95rem;
+  }
+}

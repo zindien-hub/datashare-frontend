@@ -14,7 +14,7 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
 }
@@ -25,6 +25,10 @@
 
 .subtitle {
   margin: 0.75rem 0 1.5rem;
+}
+
+.history-link {
+  margin: 1rem 0 0;
 }
 
 .form-group {
@@ -60,6 +64,7 @@ button[disabled] {
 
 .selected-file {
   margin: 0 0 1rem;
+  word-break: break-word;
 }
 
 .success-banner,
@@ -83,4 +88,52 @@ button[disabled] {
 
 .result h2 {
   margin-top: 0;
+}
+
+.result p {
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .logout-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle,
+  .history-link {
+    font-size: 0.95rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 0.7rem;
+  }
+
+  .result {
+    margin-top: 1.5rem;
+  }
 }
