@@ -1,22 +1,43 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 
 import { AuthService } from '../service/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
   const token = authService.getToken();
 
-  // N'ajoute le header Authorization que si un token est présent.
-  if (!token) {
-    return next(req);
-  }
+  const requestToSend = token
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    : req;
 
-  const authReq = req.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  return next(requestToSend).pipe(
+    catchError((error: HttpErrorResponse) => {
+      const isAuthRequest =
+        req.url.includes('/api/auth/login') ||
+        req.url.includes('/api/auth/register');
 
-  return next(authReq);
+      const isAlreadyOnLogin = router.url.startsWith('/login');
+
+      if (error.status === 401 && !isAuthRequest && !isAlreadyOnLogin) {
+        authService.logout();
+
+        router.navigate(['/login'], {
+          queryParams: {
+            returnUrl: router.url,
+            reason: 'session_expired'
+          }
+        });
+      }
+
+      return throwError(() => error);
+    })
+  );
 };

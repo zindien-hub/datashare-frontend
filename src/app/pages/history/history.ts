@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -18,53 +18,51 @@ export class History implements OnInit {
   private fileService = inject(FileService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  files: FileListItemResponse[] = [];
-  errorMessage = '';
-  successMessage = '';
-  isLoading = true;
+  files = signal<FileListItemResponse[]>([]);
+  errorMessage = signal('');
+  successMessage = signal('');
+  isLoading = signal(true);
 
   ngOnInit(): void {
     this.loadFiles();
   }
 
   loadFiles(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.cdr.detectChanges();
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.fileService.getMyFiles()
       .pipe(
         finalize(() => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.isLoading.set(false);
         })
       )
       .subscribe({
         next: (response) => {
-          this.files = Array.isArray(response) ? response : [];
-          this.cdr.detectChanges();
+          this.files.set(Array.isArray(response) ? response : []);
         },
         error: (error) => {
-          this.errorMessage = error?.error?.message || 'Erreur lors du chargement de l’historique.';
-          this.cdr.detectChanges();
+          this.errorMessage.set(
+            error?.error?.message || 'Erreur lors du chargement de l’historique.'
+          );
         }
       });
   }
 
   deleteFile(id: number): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     this.fileService.deleteFile(id).subscribe({
       next: () => {
-        this.successMessage = 'Fichier supprimé avec succès.';
+        this.successMessage.set('Fichier supprimé avec succès.');
         this.loadFiles();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.message || 'Erreur lors de la suppression du fichier.';
-        this.cdr.detectChanges();
+        this.errorMessage.set(
+          error?.error?.message || 'Erreur lors de la suppression du fichier.'
+        );
       }
     });
   }
@@ -73,43 +71,32 @@ export class History implements OnInit {
     return `${environment.backendBaseUrl}${downloadUrl}`;
   }
 
-  // Retour à la page upload
   goToUpload(): void {
     this.router.navigate(['/upload']);
   }
 
-  // Copier le lien du fichier dans le presse-papiers
   copyLinkToClipboard(downloadUrl: string): void {
     const fullLink = this.buildDownloadLink(downloadUrl);
 
     if (!navigator.clipboard) {
-      this.errorMessage = 'Copie non supportée sur ce navigateur.';
-      this.successMessage = '';
-      this.cdr.detectChanges();
+      this.errorMessage.set('Copie non supportée sur ce navigateur.');
+      this.successMessage.set('');
       return;
     }
 
     navigator.clipboard.writeText(fullLink).then(() => {
-      // Affichage du message de succès
-      this.successMessage = 'Lien copié avec succès!';
-      this.errorMessage = '';
-      this.cdr.detectChanges();
+      this.successMessage.set('Lien copié avec succès!');
+      this.errorMessage.set('');
 
-      // Effacer le message après 3 secondes
       setTimeout(() => {
-        this.successMessage = '';
-        this.cdr.detectChanges();
+        this.successMessage.set('');
       }, 3000);
     }).catch(() => {
-      // Affichage du message d'erreur
-      this.errorMessage = 'Erreur lors de la copie du lien.';
-      this.successMessage = '';
-      this.cdr.detectChanges();
+      this.errorMessage.set('Erreur lors de la copie du lien.');
+      this.successMessage.set('');
 
-      // Effacer le message après 3 secondes
       setTimeout(() => {
-        this.errorMessage = '';
-        this.cdr.detectChanges();
+        this.errorMessage.set('');
       }, 3000);
     });
   }
