@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
+    "test:coverage": "ng test --coverage --watch=false",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
   },
@@ -26,6 +28,7 @@
     "@angular/build": "^21.2.7",
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
+    "@vitest/coverage-v8": "^4.1.6",
     "cypress": "^15.15.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
