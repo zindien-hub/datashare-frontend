@@ -37,6 +37,8 @@ Après connexion, le token JWT renvoyé par le backend est stocké dans le navig
 ## Gestion des accès
 
 Le frontend protège les pages nécessitant une authentification grâce à un `AuthGuard`.
+En cas de tentative d’accès à une route protégée sans session valide, le frontend redirige l’utilisateur vers `/login`.
+En cas de réponse `401` sur une requête protégée, la session locale est supprimée et l’utilisateur est redirigé vers la page de connexion avec un message explicatif.
 
 ### Routes publiques
 - `/login`
@@ -98,7 +100,7 @@ Les vérifications suivantes ont été réalisées pendant le développement :
 - le JWT est stocké côté navigateur, ce qui reste moins robuste qu’un stockage sécurisé côté serveur ;
 - il n’existe pas encore de gestion avancée de rôles ou de permissions côté interface ;
 - les messages d’erreur de sécurité peuvent encore être améliorés ;
-- le frontend ne gère pas encore de rafraîchissement de token ou de session expirée avancée.
+- le frontend gère désormais la redirection après session invalide ou expirée, mais ne met pas encore en œuvre de mécanisme de rafraîchissement automatique du token ;
 
 ## Améliorations prévues
 

@@ -46,19 +46,18 @@ Le proxy redirige notamment :
 `/api/**`
 `/download/**` si nécessaire selon le flux utilisé
 
-L’URL backend utilisée pour les liens de téléchargement est configurée dans :
+Le frontend utilise une configuration d’environnement distincte pour le développement et la production.
 
-```bash
+Fichiers concernés :
+
+```text
 src/environments/environment.ts
+src/environments/environment.prod.ts
 ```
 
-Exemple :
+En développement local, les appels passent par le proxy Angular défini dans `proxy.conf.json`.
 
-```bash
-export const environment = {
-  backendBaseUrl: 'http://localhost:8080'
-};
-```
+En production, le frontend repose sur des chemins relatifs afin d’éviter toute dépendance à une URL `localhost` codée en dur.
 
 ## Démarrage en local
 
@@ -141,8 +140,21 @@ Lancer les tests unitaires :
 ng test
 ```
 
+Lancer les tests end-to-end :
+
+```bash
+npm run cy:run
+```
+
+Ouvrir Cypress en mode interactif :
+
+```bash
+npm run cy:open
+```
+
 ## Notes
 
 - le frontend dépend du backend DataShare pour les fonctionnalités métier ;
 - les liens de téléchargement sont construits à partir de la configuration d’environnement ;
-- certaines mises à jour de vue après chargement asynchrone ont nécessité une détection explicite dans certains composants pour stabiliser le MVP.
+- les pages critiques ont été stabilisées avec une gestion d’état réactive adaptée au framework ;
+- le frontend s’appuie désormais sur des tests unitaires, des tests end-to-end Cypress et des validations manuelles sur les parcours critiques.

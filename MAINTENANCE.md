@@ -127,7 +127,7 @@ Le frontend repose principalement sur :
 - Angular ;
 - TypeScript ;
 - RxJS ;
-- Vitest.
+- Cypress pour les tests end-to-end.
 
 #### Vérification courante
 
@@ -137,6 +137,7 @@ La maintenance doit inclure au minimum :
 npm install
 ng build
 ng test
+npm run cy:run
 npm audit
 ```
 
@@ -223,6 +224,7 @@ Avant de fusionner une évolution frontend, vérifier au minimum :
 
 - le projet build correctement ;
 - `ng test` passe ;
+- les tests end-to-end sont relancés si les parcours critiques sont impactés ;
 - les pages impactées ont été testées manuellement ;
 - le comportement responsive n’est pas dégradé ;
 - les éventuels impacts documentation ont été traités.
