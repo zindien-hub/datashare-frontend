@@ -61,14 +61,17 @@ Les principes suivants guident la maintenance du frontend :
 - limiter la logique métier dans les composants et dans les templates ;
 - centraliser la gestion d’authentification ;
 - protéger les routes par guard ;
+- centraliser l’injection du JWT et la gestion des réponses `401` dans l’interceptor ;
 - maintenir une interface cohérente entre desktop et mobile ;
-- garder la documentation alignée avec l’état réel du projet.
+- garder la documentation alignée avec l’état réel du projet ;
+- maintenir une base de tests cohérente avec l’outillage actuellement utilisé par le projet.
 
 ## Fréquence de maintenance recommandée
 
 ### À chaque évolution fonctionnelle
 
 - reconstruire le frontend ;
+- exécuter les tests automatisés frontend ;
 - vérifier la navigation ;
 - vérifier le comportement des pages impactées ;
 - mettre à jour la documentation si nécessaire.
@@ -76,10 +79,11 @@ Les principes suivants guident la maintenance du frontend :
 ### À chaque correction de bug
 
 - reproduire le problème ;
-- identifier s’il s’agit d’un problème de composant, de service, de routage ou de rendu ;
+- identifier s’il s’agit d’un problème de composant, de service, de routage, d’interceptor, de guard ou de rendu ;
 - corriger dans la bonne couche ;
 - revalider manuellement le parcours ;
-- adapter ou ajouter un test si pertinent.
+- adapter ou ajouter un test si pertinent ;
+- vérifier si la couverture des parcours critiques doit être renforcée.
 
 ### Au minimum une fois par sprint ou une fois par mois
 
@@ -101,10 +105,13 @@ En cas de bug frontend, la démarche recommandée est :
     - composant ;
     - template ;
     - styles responsive ;
+    - état local du composant ;
+    - gestion de session ;
 3. corriger dans la couche appropriée ;
 4. revalider manuellement ;
-5. compléter les tests si le cas le justifie ;
-6. mettre à jour la documentation si le comportement utilisateur change.
+5. compléter ou ajuster les tests si le cas le justifie ;
+6. relancer les tests frontend concernés ;
+7. mettre à jour la documentation si le comportement utilisateur change.
 
 ## Procédure de maintenance évolutive
 
@@ -127,6 +134,7 @@ Le frontend repose principalement sur :
 - Angular ;
 - TypeScript ;
 - RxJS ;
+- Vitest via l’intégration de test Angular actuelle ;
 - Cypress pour les tests end-to-end.
 
 #### Vérification courante
@@ -136,7 +144,8 @@ La maintenance doit inclure au minimum :
 ```bash
 npm install
 ng build
-ng test
+npm test
+npm run test:coverage
 npm run cy:run
 npm audit
 ```
@@ -155,13 +164,13 @@ En cas de mise à jour de dépendance :
 
 1. mettre à jour un package ou un groupe cohérent de packages ;
 2. reconstruire le frontend ;
-3. exécuter les tests ;
+3. exécuter les tests unitaires et la couverture ;
 4. vérifier manuellement :
     - login ;
     - register ;
     - upload ;
     - history ;
-5. redirections liées au guard ;
+5. vérifier les redirections liées au guard et à l’expiration de session ;
 6. vérifier qu’aucune régression responsive n’a été introduite.
 
 ## Zones sensibles du frontend
@@ -173,6 +182,8 @@ Les zones suivantes doivent être surveillées en priorité :
 - stockage du JWT ;
 - déconnexion ;
 - protection des routes ;
+- redirection après session expirée ;
+- gestion du `returnUrl` ;
 - cohérence entre état connecté et navigation.
 
 ### Intégration API
@@ -200,11 +211,11 @@ Les zones suivantes doivent être surveillées en priorité :
 
 Les points suivants restent des sujets de maintenance :
 
-- la couverture de tests frontend reste partielle ;
+- la couverture de tests frontend progresse mais reste partielle à l’échelle de l’ensemble des templates et comportements visuels ;
 - la performance mobile est inférieure à la performance desktop ;
-- certaines pages critiques peuvent encore être renforcées côté tests ;
+- les composants critiques sont désormais mieux couverts, mais les scénarios UI avancés et certains cas limites restent à renforcer ;
 - l’audit Lighthouse n’est pas industrialisé ;
-- l’analyse de performance des routes protégées constitue encore un point faible du projet : 
+- l’analyse de performance des routes protégées constitue encore un point faible du projet :
   elle dépend d’audits manuels en session authentifiée et ne bénéficie pas encore d’une automatisation fiable.
 
 ## Bonnes pratiques recommandées
@@ -223,7 +234,8 @@ Pour maintenir le frontend dans de bonnes conditions :
 Avant de fusionner une évolution frontend, vérifier au minimum :
 
 - le projet build correctement ;
-- `ng test` passe ;
+- `npm test` passe ;
+- `npm run test:coverage` a été vérifié si la modification touche le comportement applicatif ou les tests ;
 - les tests end-to-end sont relancés si les parcours critiques sont impactés ;
 - les pages impactées ont été testées manuellement ;
 - le comportement responsive n’est pas dégradé ;
@@ -231,11 +243,11 @@ Avant de fusionner une évolution frontend, vérifier au minimum :
 
 ## Conclusion
 
-Le frontend DataShare dispose d’une base maintenable pour un MVP, avec une architecture claire et une séparation correcte des responsabilités.
+Le frontend DataShare dispose d’une base maintenable pour un MVP, avec une architecture claire, une séparation des responsabilités et un socle de tests frontend plus solide.
 
 Les priorités actuelles sont :
 
-- poursuivre le renforcement des tests ;
+- poursuivre le renforcement de la couverture de tests ;
 - améliorer les performances mobiles ;
 - surveiller l’évolution du bundle ;
-- conserver une cohérence entre architecture, responsive et documentation.
+- conserver une cohérence entre architecture, sécurité, responsive et documentation.

@@ -18,7 +18,10 @@ Le frontend met en place les mécanismes suivants :
 - garde de route pour les pages protégées ;
 - ajout automatique du header `Authorization` sur les appels API protégés ;
 - déconnexion utilisateur ;
-- séparation entre routes publiques et routes authentifiées.
+- séparation entre routes publiques et routes authentifiées ;
+- redirection automatique vers `/login` en cas de session invalide ou expirée ;
+- conservation de l’URL de retour (`returnUrl`) pour renvoyer l’utilisateur vers la page initialement demandée après reconnexion ;
+- affichage d’un message informatif lorsque la session a expiré.
 
 ## Authentification côté frontend
 
@@ -37,8 +40,18 @@ Après connexion, le token JWT renvoyé par le backend est stocké dans le navig
 ## Gestion des accès
 
 Le frontend protège les pages nécessitant une authentification grâce à un `AuthGuard`.
+
 En cas de tentative d’accès à une route protégée sans session valide, le frontend redirige l’utilisateur vers `/login`.
-En cas de réponse `401` sur une requête protégée, la session locale est supprimée et l’utilisateur est redirigé vers la page de connexion avec un message explicatif.
+
+En cas de réponse `401` sur une requête protégée, l’interceptor HTTP :
+- supprime la session locale ;
+- redirige l’utilisateur vers `/login` ;
+- transmet un paramètre `reason=session_expired` ;
+- transmet également un paramètre `returnUrl` correspondant à la route en cours.
+
+La page de connexion exploite ensuite ces paramètres pour :
+- afficher un message informatif de session expirée ;
+- renvoyer l’utilisateur vers la page demandée après reconnexion réussie.
 
 ### Routes publiques
 - `/login`
@@ -67,7 +80,10 @@ Le frontend propose :
 
 - la sauvegarde du token après connexion ;
 - la récupération du token pour les appels protégés ;
-- la suppression du token lors de la déconnexion.
+- la suppression du token lors de la déconnexion ;
+- la suppression automatique du token en cas de réponse `401` sur une route protégée ;
+- la redirection vers la page de connexion lorsque la session n’est plus valide ;
+- l’affichage d’un message utilisateur lorsque la session a expiré.
 
 La déconnexion invalide donc la session côté client en supprimant le JWT stocké dans le navigateur.
 
@@ -91,6 +107,9 @@ Les vérifications suivantes ont été réalisées pendant le développement :
 - ajout correct du JWT dans les requêtes protégées ;
 - accès autorisé aux pages protégées après connexion ;
 - déconnexion effective avec suppression du token ;
+- redirection automatique vers `/login` en cas de `401` sur une route protégée ;
+- transmission correcte de `returnUrl` lors de l’expiration de session ;
+- affichage du message de session expirée sur la page de connexion ;
 - téléchargement correct d’un fichier via le lien public depuis l’historique.
 
 ## Limites actuelles
@@ -100,14 +119,17 @@ Les vérifications suivantes ont été réalisées pendant le développement :
 - le JWT est stocké côté navigateur, ce qui reste moins robuste qu’un stockage sécurisé côté serveur ;
 - il n’existe pas encore de gestion avancée de rôles ou de permissions côté interface ;
 - les messages d’erreur de sécurité peuvent encore être améliorés ;
-- le frontend gère désormais la redirection après session invalide ou expirée, mais ne met pas encore en œuvre de mécanisme de rafraîchissement automatique du token ;
+- le frontend gère la redirection après session invalide ou expirée, mais ne met pas encore en œuvre de mécanisme de rafraîchissement automatique du token ;
+- la protection côté frontend complète mais ne remplace pas les contrôles de sécurité côté backend ;
+- la gestion actuelle reste adaptée à un MVP et non à un durcissement complet de niveau production.
 
 ## Améliorations prévues
 
 Les améliorations envisagées sont :
 
 - mieux gérer l’expiration du JWT côté interface ;
-- ajouter une gestion plus fine des erreurs 401/403 ;
-- renforcer les tests automatisés liés à l’interceptor et aux accès protégés ;
+- ajouter une gestion plus fine des erreurs `401` (Unauthorized) et `403` (Forbidden);
+- renforcer encore les tests automatisés liés à l’interceptor, au guard et aux scénarios de session expirée ;
 - améliorer la signalisation visuelle des états de session expirée ;
+- envisager une stratégie plus robuste de gestion du token ;
 - aligner davantage le comportement frontend avec un durcissement sécurité de niveau production.

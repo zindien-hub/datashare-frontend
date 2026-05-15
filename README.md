@@ -22,6 +22,8 @@ Le frontend communique avec le backend Spring Boot via des endpoints REST.
 - SCSS
 - Angular Router
 - HttpClient
+- Vitest via l’intégration de test Angular actuelle
+- Cypress
 - Proxy Angular en développement
 
 ## Pré-requis
@@ -79,11 +81,14 @@ L’application est ensuite disponible sur : `http://localhost:4200`
 
 ### Authentification
 
-- page d’inscription;
-- page de connexion;
-- stockage du JWT dans le navigateur;
-- protection des routes authentifiées;
-- ajout automatique du header `Authorization` via un interceptor.
+- page d’inscription ;
+- page de connexion ;
+- stockage du JWT dans le navigateur ;
+- protection des routes authentifiées ;
+- ajout automatique du header `Authorization` via un interceptor ;
+- déconnexion utilisateur ;
+- redirection vers `/login` en cas de session expirée sur une route protégée ;
+- conservation du `returnUrl` lors de la redirection après expiration de session.
 
 ### Gestion des fichiers
 
@@ -104,7 +109,8 @@ L’application est ensuite disponible sur : `http://localhost:4200`
 - garde de route (`AuthGuard`) pour les pages protégées ;
 - interceptor HTTP pour injecter le JWT ;
 - déconnexion utilisateur ;
-- redirection vers la page de connexion si l’utilisateur n’est pas authentifié.
+- redirection vers la page de connexion si l’utilisateur n’est pas authentifié ;
+- suppression de la session locale et redirection vers `/login` avec message explicatif en cas de réponse `401` sur une route protégée.
 
 ## Structure du projet
 
@@ -140,6 +146,18 @@ Lancer les tests unitaires :
 ng test
 ```
 
+Lancer les tests frontend en mode watch :
+
+```bash
+npm run test:watch
+```
+
+Lancer les tests frontend avec couverture :
+
+```bash
+npm run test:coverage
+```
+
 Lancer les tests end-to-end :
 
 ```bash
@@ -157,4 +175,5 @@ npm run cy:open
 - le frontend dépend du backend DataShare pour les fonctionnalités métier ;
 - les liens de téléchargement sont construits à partir de la configuration d’environnement ;
 - les pages critiques ont été stabilisées avec une gestion d’état réactive adaptée au framework ;
-- le frontend s’appuie désormais sur des tests unitaires, des tests end-to-end Cypress et des validations manuelles sur les parcours critiques.
+- le frontend s’appuie désormais sur des tests frontend exécutés via Angular/Vitest, des tests end-to-end Cypress et des validations manuelles sur les parcours critiques ;
+- la couverture actuelle atteint 57 tests automatisés au vert avec un suivi de couverture disponible via `npm run test:coverage`.
