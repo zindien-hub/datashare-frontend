@@ -178,5 +178,4 @@ npm run cy:open
 - le frontend dépend du backend DataShare pour les fonctionnalités métier ;
 - les liens de téléchargement sont construits à partir de la configuration d’environnement ;
 - les pages critiques ont été stabilisées avec une gestion d’état réactive adaptée au framework ;
-- le frontend s’appuie désormais sur des tests frontend exécutés via Angular/Vitest, des tests end-to-end Cypress et des validations manuelles sur les parcours critiques ;
-- la couverture actuelle atteint 57 tests automatisés au vert avec un suivi de couverture disponible via `npm run test:coverage`.
+- le frontend s’appuie désormais sur des tests frontend exécutés via Angular/Vitest, des tests end-to-end Cypress et des validations manuelles sur les parcours critiques .
