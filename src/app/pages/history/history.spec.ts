@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { History } from './history';
 import { FileService } from '../../core/service/file.service';
 import { AuthService } from '../../core/service/auth.service';
+import { FileListItemResponse } from '../../core/models/file-list-item-response.model';
 import { environment } from '../../../environments/environment';
 
 describe('History', () => {
@@ -14,7 +15,8 @@ describe('History', () => {
 
   const fileServiceMock = {
     getMyFiles: vi.fn(),
-    deleteFile: vi.fn()
+    deleteFile: vi.fn(),
+    deleteFiles: vi.fn()
   };
 
   const authServiceMock = {
@@ -24,6 +26,29 @@ describe('History', () => {
   const routerMock = {
     navigate: vi.fn()
   };
+
+  const mockFiles: FileListItemResponse[] = [
+    {
+      id: 1,
+      originalName: 'a.txt',
+      contentType: 'text/plain',
+      size: 1,
+      downloadToken: 'token-a',
+      downloadUrl: '/download/token-a',
+      expiresAt: '2026-05-16T10:00:00Z',
+      createdAt: '2026-05-15T10:00:00Z'
+    },
+    {
+      id: 2,
+      originalName: 'b.txt',
+      contentType: 'text/plain',
+      size: 1,
+      downloadToken: 'token-b',
+      downloadUrl: '/download/token-b',
+      expiresAt: '2026-05-16T10:00:00Z',
+      createdAt: '2026-05-15T10:00:00Z'
+    }
+  ];
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -46,7 +71,7 @@ describe('History', () => {
   });
 
   it('should load files on init', () => {
-    const files = [
+    const files: FileListItemResponse[] = [
       {
         id: 1,
         originalName: 'test.pdf',
@@ -75,6 +100,16 @@ describe('History', () => {
 
     expect(component.files()).toEqual([]);
     expect(component.isLoading()).toBe(false);
+  });
+
+  it('should clear selection when files are reloaded', () => {
+    fileServiceMock.getMyFiles.mockReturnValue(of(mockFiles));
+    component.selectedFileIds.set(new Set([1, 2]));
+
+    component.loadFiles();
+
+    expect(component.files()).toEqual(mockFiles);
+    expect(component.selectedFileIds().size).toBe(0);
   });
 
   it('should set error message when loadFiles fails', () => {
@@ -111,6 +146,104 @@ describe('History', () => {
     expect(fileServiceMock.deleteFile).toHaveBeenCalledWith(1);
     expect(component.successMessage()).toBe('Fichier supprimé avec succès.');
     expect(loadFilesSpy).toHaveBeenCalled();
+  });
+
+  it('should manage file selection', () => {
+    expect(component.isFileSelected(1)).toBe(false);
+
+    component.toggleFileSelection(1);
+
+    expect(component.isFileSelected(1)).toBe(true);
+
+    component.toggleFileSelection(1);
+
+    expect(component.isFileSelected(1)).toBe(false);
+  });
+
+  it('should select and deselect all files', () => {
+    component.files.set(mockFiles);
+
+    component.toggleAllFiles({ target: { checked: true } } as unknown as Event);
+
+    expect(component.areAllFilesSelected()).toBe(true);
+    expect(component.selectedFileIds().size).toBe(2);
+
+    component.toggleAllFiles({ target: { checked: false } } as unknown as Event);
+
+    expect(component.hasSelectedFiles()).toBe(false);
+    expect(component.selectedFileIds().size).toBe(0);
+  });
+
+  it('should delete selected files and reload list', () => {
+    fileServiceMock.deleteFiles.mockReturnValue(of(void 0));
+    fileServiceMock.getMyFiles.mockReturnValue(of([]));
+    const loadFilesSpy = vi.spyOn(component, 'loadFiles');
+
+    component.selectedFileIds.set(new Set([1, 2]));
+
+    component.deleteSelectedFiles();
+
+    expect(fileServiceMock.deleteFiles).toHaveBeenCalledWith([1, 2]);
+    expect(component.successMessage()).toBe('Fichiers supprimés avec succès.');
+    expect(component.selectedFileIds().size).toBe(0);
+    expect(component.isDeletingSelection()).toBe(false);
+    expect(loadFilesSpy).toHaveBeenCalled();
+  });
+
+  it('should set deleting state during bulk delete', () => {
+    const deleteSubject = new Subject<void>();
+    fileServiceMock.deleteFiles.mockReturnValue(deleteSubject.asObservable());
+
+    component.selectedFileIds.set(new Set([1, 2]));
+    component.deleteSelectedFiles();
+
+    expect(component.isDeletingSelection()).toBe(true);
+
+    deleteSubject.next();
+    deleteSubject.complete();
+
+    expect(component.isDeletingSelection()).toBe(false);
+  });
+
+  it('should not call deleteFiles when nothing is selected', () => {
+    component.deleteSelectedFiles();
+
+    expect(fileServiceMock.deleteFiles).not.toHaveBeenCalled();
+  });
+
+  it('should not call deleteFiles when bulk delete is already in progress', () => {
+    component.selectedFileIds.set(new Set([1, 2]));
+    component.isDeletingSelection.set(true);
+
+    component.deleteSelectedFiles();
+
+    expect(fileServiceMock.deleteFiles).not.toHaveBeenCalled();
+  });
+
+  it('should set error message when bulk delete fails', () => {
+    fileServiceMock.deleteFiles.mockReturnValue(
+      throwError(() => ({
+        error: { message: 'Suppression multiple impossible' }
+      }))
+    );
+
+    component.selectedFileIds.set(new Set([1, 2]));
+    component.deleteSelectedFiles();
+
+    expect(component.errorMessage()).toBe('Suppression multiple impossible');
+    expect(component.isDeletingSelection()).toBe(false);
+  });
+
+  it('should use fallback error message when bulk delete fails without backend message', () => {
+    fileServiceMock.deleteFiles.mockReturnValue(throwError(() => ({})));
+
+    component.selectedFileIds.set(new Set([1, 2]));
+    component.deleteSelectedFiles();
+
+    expect(component.errorMessage()).toBe(
+      'Erreur lors de la suppression des fichiers.'
+    );
+    expect(component.isDeletingSelection()).toBe(false);
   });
 
   it('should set error message when deleteFile fails', () => {

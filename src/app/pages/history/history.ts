@@ -20,9 +20,11 @@ export class History implements OnInit {
   private router = inject(Router);
 
   files = signal<FileListItemResponse[]>([]);
+  selectedFileIds = signal<Set<number>>(new Set());
   errorMessage = signal('');
   successMessage = signal('');
   isLoading = signal(true);
+  isDeletingSelection = signal(false);
 
   ngOnInit(): void {
     this.loadFiles();
@@ -41,6 +43,7 @@ export class History implements OnInit {
       .subscribe({
         next: (response) => {
           this.files.set(Array.isArray(response) ? response : []);
+          this.selectedFileIds.set(new Set());
         },
         error: (error) => {
           this.errorMessage.set(
@@ -65,6 +68,73 @@ export class History implements OnInit {
         );
       }
     });
+  }
+
+  toggleFileSelection(id: number): void {
+    const nextSelection = new Set(this.selectedFileIds());
+
+    if (nextSelection.has(id)) {
+      nextSelection.delete(id);
+    } else {
+      nextSelection.add(id);
+    }
+
+    this.selectedFileIds.set(nextSelection);
+  }
+
+  toggleAllFiles(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (!checked) {
+      this.selectedFileIds.set(new Set());
+      return;
+    }
+
+    this.selectedFileIds.set(new Set(this.files().map((file) => file.id)));
+  }
+
+  isFileSelected(id: number): boolean {
+    return this.selectedFileIds().has(id);
+  }
+
+  areAllFilesSelected(): boolean {
+    const files = this.files();
+    return files.length > 0 && this.selectedFileIds().size === files.length;
+  }
+
+  hasSelectedFiles(): boolean {
+    return this.selectedFileIds().size > 0;
+  }
+
+  deleteSelectedFiles(): void {
+    const fileIds = Array.from(this.selectedFileIds());
+
+    if (fileIds.length === 0 || this.isDeletingSelection()) {
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.isDeletingSelection.set(true);
+
+    this.fileService.deleteFiles(fileIds)
+      .pipe(
+        finalize(() => {
+          this.isDeletingSelection.set(false);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.selectedFileIds.set(new Set());
+          this.successMessage.set('Fichiers supprimés avec succès.');
+          this.loadFiles();
+        },
+        error: (error) => {
+          this.errorMessage.set(
+            error?.error?.message || 'Erreur lors de la suppression des fichiers.'
+          );
+        }
+      });
   }
 
   buildDownloadLink(downloadUrl: string): string {

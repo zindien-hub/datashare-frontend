@@ -25,7 +25,11 @@ export class FileService {
     return this.http.get<FileListItemResponse[]>(this.apiUrl);
   }
 
-  deleteFile(id: number) {
+  deleteFile(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  deleteFiles(fileIds: number[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/bulk-delete`, { fileIds });
   }
 }
