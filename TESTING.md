@@ -184,7 +184,7 @@ Parcours couverts :
 À ce stade :
 
 - **9 fichiers de tests unitaires frontend**
-- **57 tests unitaires frontend au vert**
+- **67 tests unitaires frontend au vert**
 - **5 specs Cypress**
 - **9 tests E2E au vert**
 
@@ -198,10 +198,10 @@ npm run test:coverage
 
 Résultat actuel :
 
-- **Statements : `73.02 %`**
-- **Branches : `69.78 %`**
-- **Functions : `81.03 %`**
-- **Lines : `80.58 %`**
+- **Statements : `73 %`**
+- **Branches : `70.79 %`**
+- **Functions : `80.55 %`**
+- **Lines : `80.22 %`**
 
 ### Points actuellement couverts à 100 %
 
