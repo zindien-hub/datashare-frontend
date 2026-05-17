@@ -11,7 +11,8 @@ Cette application permet à un utilisateur de :
 - uploader un fichier ;
 - consulter l’historique de ses fichiers ;
 - télécharger un fichier via un lien public ;
-- supprimer un fichier depuis l’historique.
+- supprimer un fichier unitairement depuis l’historique ;
+- sélectionner plusieurs fichiers et les supprimer en une seule action.
 
 Le frontend communique avec le backend Spring Boot via des endpoints REST.
 
@@ -22,7 +23,7 @@ Le frontend communique avec le backend Spring Boot via des endpoints REST.
 - SCSS
 - Angular Router
 - HttpClient
-- Vitest via l’intégration de test Angular actuelle
+- Angular TestBed avec exécution via Vitest
 - Cypress
 - Proxy Angular en développement
 
@@ -92,10 +93,11 @@ L’application est ensuite disponible sur : `http://localhost:4200`
 
 ### Gestion des fichiers
 
-- upload de fichier pour l’utilisateur connecté;
-- historique des fichiers envoyés;
-- téléchargement via un lien public;
-- suppression d’un fichier depuis l’historique.
+- upload de fichier pour l’utilisateur connecté ;
+- historique des fichiers envoyés ;
+- téléchargement via un lien public ;
+- suppression unitaire d’un fichier depuis l’historique ;
+- sélection multiple et suppression groupée depuis l’historique.
 
 ## Routes principales
 
@@ -110,7 +112,8 @@ L’application est ensuite disponible sur : `http://localhost:4200`
 - interceptor HTTP pour injecter le JWT ;
 - déconnexion utilisateur ;
 - redirection vers la page de connexion si l’utilisateur n’est pas authentifié ;
-- suppression de la session locale et redirection vers `/login` avec message explicatif en cas de réponse `401` sur une route protégée.
+- suppression de la session locale et redirection vers `/login` avec message explicatif en cas de réponse `401` sur une route protégée ;
+- accès à la suppression unitaire ou multiple réservé aux parcours authentifiés via le backend protégé.
 
 ## Structure du projet
 
@@ -140,10 +143,10 @@ Les fichiers générés sont produits dans le dossier `dist/`.
 
 ## Tests
 
-Lancer les tests unitaires :
+Lancer les tests frontend :
 
 ```bash
-ng test
+npm run test
 ```
 
 Lancer les tests frontend en mode watch :
