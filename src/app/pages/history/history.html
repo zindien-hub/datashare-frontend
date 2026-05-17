@@ -4,97 +4,134 @@
       <h1>Historique des fichiers</h1>
 
       <div class="header-buttons">
-        <button type="button" class="back-upload-button" (click)="goToUpload()" title="Retourner à la page d'upload">
+        <button
+          type="button"
+          class="back-upload-button"
+          (click)="goToUpload()"
+          title="Retourner à la page d'upload"
+        >
           Retour à l'upload
         </button>
 
-        <button type="button" class="logout-button" (click)="onLogout()" title="Se déconnecter de votre compte">
+        <button
+          type="button"
+          class="logout-button"
+          (click)="onLogout()"
+          title="Se déconnecter de votre compte"
+        >
           Se déconnecter
         </button>
       </div>
     </div>
+
     @if (successMessage()) {
-    <p class="success-banner">{{ successMessage() }}</p>
+      <p class="success-banner">{{ successMessage() }}</p>
     }
 
     @if (errorMessage()) {
-    <p class="error-banner">{{ errorMessage() }}</p>
+      <p class="error-banner">{{ errorMessage() }}</p>
     }
 
     @if (isLoading()) {
-    <p>Chargement...</p>
+      <p>Chargement...</p>
     } @else if (files().length === 0) {
-    <p>Aucun fichier envoyé pour le moment.</p>
+      <p>Aucun fichier envoyé pour le moment.</p>
     } @else {
-    @if (hasSelectedFiles()) {
-    <div class="selection-bar">
-      <span>{{ selectedFileIds().size }} fichier(s) sélectionné(s)</span>
-      <button type="button" class="delete-selected-button" (click)="deleteSelectedFiles()">
-        Supprimer la sélection
-      </button>
-    </div>
-    }
+      @if (hasSelectedFiles()) {
+        <div class="selection-bar">
+          <span>{{ selectedFileIds().size }} fichier(s) sélectionné(s)</span>
+          <button
+            type="button"
+            class="delete-selected-button"
+            (click)="deleteSelectedFiles()"
+            [disabled]="isDeletingSelection()"
+          >
+            @if (isDeletingSelection()) {
+              Suppression...
+            } @else {
+              Supprimer la sélection
+            }
+          </button>
+        </div>
+      }
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                [checked]="areAllFilesSelected()"
-                [indeterminate]="hasSelectedFiles() && !areAllFilesSelected()"
-                (change)="toggleAllFiles($event)"
-                aria-label="Sélectionner tous les fichiers"
-              />
-            </th>
-            <th>Nom</th>
-            <th>Type</th>
-            <th>Taille</th>
-            <th>Créé le</th>
-            <th>Expiration</th>
-            <th>Téléchargement</th>
-            <th>Copier le lien</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (file of files(); track file.id) {
-          <tr>
-            <td>
-              <input
-                type="checkbox"
-                [checked]="isFileSelected(file.id)"
-                (change)="toggleFileSelection(file.id)"
-                aria-label="Sélectionner le fichier {{ file.originalName }}"
-              />
-            </td>
-            <td class="file-name">{{ file.originalName }}</td>
-            <td>{{ file.contentType || 'n/a' }}</td>
-            <td>{{ file.size }} octets</td>
-            <td>{{ file.createdAt | date:'short' }}</td>
-            <td>{{ file.expiresAt | date:'short' }}</td>
-            <td>
-              <a [href]="buildDownloadLink(file.downloadUrl)" target="_blank" rel="noopener">
-                Télécharger
-              </a>
-            </td>
-            <td>
-              <button type="button" class="copy-link-button" (click)="copyLinkToClipboard(file.downloadUrl)"
-                title="Copier le lien de téléchargement">
-                Copier
-              </button>
-            </td>
-            <td>
-              <button type="button" class="delete-button" (click)="deleteFile(file.id)" title="Supprimer ce fichier">
-                Supprimer
-              </button>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  [checked]="areAllFilesSelected()"
+                  [indeterminate]="hasSelectedFiles() && !areAllFilesSelected()"
+                  (change)="toggleAllFiles($event)"
+                  [disabled]="isDeletingSelection()"
+                  aria-label="Sélectionner tous les fichiers"
+                />
+              </th>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>Taille</th>
+              <th>Créé le</th>
+              <th>Expiration</th>
+              <th>Téléchargement</th>
+              <th>Copier le lien</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (file of files(); track file.id) {
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
+                    [checked]="isFileSelected(file.id)"
+                    (change)="toggleFileSelection(file.id)"
+                    [disabled]="isDeletingSelection()"
+                    aria-label="Sélectionner le fichier {{ file.originalName }}"
+                  />
+                </td>
+                <td class="file-name">{{ file.originalName }}</td>
+                <td>{{ file.contentType || 'n/a' }}</td>
+                <td>{{ file.size }} octets</td>
+                <td>{{ file.createdAt | date:'short' }}</td>
+                <td>{{ file.expiresAt | date:'short' }}</td>
+                <td>
+                  <a
+                    [href]="buildDownloadLink(file.downloadUrl)"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Télécharger
+                  </a>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="copy-link-button"
+                    (click)="copyLinkToClipboard(file.downloadUrl)"
+                    title="Copier le lien de téléchargement"
+                    [disabled]="isDeletingSelection()"
+                  >
+                    Copier
+                  </button>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="delete-button"
+                    (click)="deleteFile(file.id)"
+                    title="Supprimer ce fichier"
+                    [disabled]="isDeletingSelection()"
+                  >
+                    Supprimer
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </section>
 </main>

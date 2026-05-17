@@ -90,4 +90,18 @@ describe('FileService', () => {
 
     req.flush(null);
   });
+
+  it('should delete multiple files', () => {
+    service.deleteFiles([1, 2, 3]).subscribe((response) => {
+      expect(response).toBeNull();
+    });
+
+    const req = httpMock.expectOne('/api/files/bulk-delete');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      fileIds: [1, 2, 3]
+    });
+
+    req.flush(null);
+  });
 });

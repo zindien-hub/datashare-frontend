@@ -24,6 +24,7 @@ export class History implements OnInit {
   errorMessage = signal('');
   successMessage = signal('');
   isLoading = signal(true);
+  isDeletingSelection = signal(false);
 
   ngOnInit(): void {
     this.loadFiles();
@@ -89,7 +90,7 @@ export class History implements OnInit {
       return;
     }
 
-    this.selectedFileIds.set(new Set(this.files().map(file => file.id)));
+    this.selectedFileIds.set(new Set(this.files().map((file) => file.id)));
   }
 
   isFileSelected(id: number): boolean {
@@ -108,25 +109,32 @@ export class History implements OnInit {
   deleteSelectedFiles(): void {
     const fileIds = Array.from(this.selectedFileIds());
 
-    if (fileIds.length === 0) {
+    if (fileIds.length === 0 || this.isDeletingSelection()) {
       return;
     }
 
     this.errorMessage.set('');
     this.successMessage.set('');
+    this.isDeletingSelection.set(true);
 
-    this.fileService.deleteFiles(fileIds).subscribe({
-      next: () => {
-        this.selectedFileIds.set(new Set());
-        this.successMessage.set('Fichiers supprimés avec succès.');
-        this.loadFiles();
-      },
-      error: (error) => {
-        this.errorMessage.set(
-          error?.error?.message || 'Erreur lors de la suppression des fichiers.'
-        );
-      }
-    });
+    this.fileService.deleteFiles(fileIds)
+      .pipe(
+        finalize(() => {
+          this.isDeletingSelection.set(false);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.selectedFileIds.set(new Set());
+          this.successMessage.set('Fichiers supprimés avec succès.');
+          this.loadFiles();
+        },
+        error: (error) => {
+          this.errorMessage.set(
+            error?.error?.message || 'Erreur lors de la suppression des fichiers.'
+          );
+        }
+      });
   }
 
   buildDownloadLink(downloadUrl: string): string {
