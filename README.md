@@ -73,7 +73,7 @@ npm install
 Lancer le serveur de développement :
 
 ```bash
-ng serve
+npm start
 ```
 
 L’application est ensuite disponible sur : `http://localhost:4200`
@@ -136,7 +136,7 @@ src/app/
 Créer un build de production :
 
 ```bash
-ng build
+npm run build
 ```
 
 Les fichiers générés sont produits dans le dossier `dist/`.
