@@ -28,4 +28,8 @@ export class FileService {
   deleteFile(id: number) {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  deleteFiles(fileIds: number[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/bulk-delete`, { fileIds });
+  }
 }

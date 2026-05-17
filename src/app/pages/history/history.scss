@@ -29,6 +29,28 @@
   justify-content: flex-end;
 }
 
+.selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cfe3ff;
+  border-radius: 0.75rem;
+  background: #f5f9ff;
+}
+
+.delete-selected-button {
+  background: #ffe3e3;
+  border-color: #ef9a9a;
+  color: #b71c1c;
+}
+
+.delete-selected-button:hover {
+  background: #ffc9c9;
+}
+
 .error-banner {
   margin: 0 0 1rem;
   color: #b00020;
@@ -69,6 +91,10 @@ td {
 
 .file-name {
   min-width: 140px;
+}
+
+input[type='checkbox'] {
+  cursor: pointer;
 }
 
 /* Base commune pour tous les boutons de la page */

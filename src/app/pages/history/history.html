@@ -26,10 +26,28 @@
     } @else if (files().length === 0) {
     <p>Aucun fichier envoyé pour le moment.</p>
     } @else {
+    @if (hasSelectedFiles()) {
+    <div class="selection-bar">
+      <span>{{ selectedFileIds().size }} fichier(s) sélectionné(s)</span>
+      <button type="button" class="delete-selected-button" (click)="deleteSelectedFiles()">
+        Supprimer la sélection
+      </button>
+    </div>
+    }
+
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
+            <th>
+              <input
+                type="checkbox"
+                [checked]="areAllFilesSelected()"
+                [indeterminate]="hasSelectedFiles() && !areAllFilesSelected()"
+                (change)="toggleAllFiles($event)"
+                aria-label="Sélectionner tous les fichiers"
+              />
+            </th>
             <th>Nom</th>
             <th>Type</th>
             <th>Taille</th>
@@ -43,6 +61,14 @@
         <tbody>
           @for (file of files(); track file.id) {
           <tr>
+            <td>
+              <input
+                type="checkbox"
+                [checked]="isFileSelected(file.id)"
+                (change)="toggleFileSelection(file.id)"
+                aria-label="Sélectionner le fichier {{ file.originalName }}"
+              />
+            </td>
             <td class="file-name">{{ file.originalName }}</td>
             <td>{{ file.contentType || 'n/a' }}</td>
             <td>{{ file.size }} octets</td>

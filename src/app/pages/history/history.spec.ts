@@ -14,7 +14,8 @@ describe('History', () => {
 
   const fileServiceMock = {
     getMyFiles: vi.fn(),
-    deleteFile: vi.fn()
+    deleteFile: vi.fn(),
+    deleteFiles: vi.fn()
   };
 
   const authServiceMock = {
@@ -111,6 +112,56 @@ describe('History', () => {
     expect(fileServiceMock.deleteFile).toHaveBeenCalledWith(1);
     expect(component.successMessage()).toBe('Fichier supprimé avec succès.');
     expect(loadFilesSpy).toHaveBeenCalled();
+  });
+
+  it('should manage file selection', () => {
+    expect(component.isFileSelected(1)).toBe(false);
+
+    component.toggleFileSelection(1);
+
+    expect(component.isFileSelected(1)).toBe(true);
+
+    component.toggleFileSelection(1);
+
+    expect(component.isFileSelected(1)).toBe(false);
+  });
+
+  it('should select and deselect all files', () => {
+    component.files.set([
+      { id: 1, originalName: 'a.txt', contentType: 'text/plain', size: 1, downloadToken: 'a', downloadUrl: '/a', expiresAt: '2026-05-16T10:00:00Z', createdAt: '2026-05-15T10:00:00Z' },
+      { id: 2, originalName: 'b.txt', contentType: 'text/plain', size: 1, downloadToken: 'b', downloadUrl: '/b', expiresAt: '2026-05-16T10:00:00Z', createdAt: '2026-05-15T10:00:00Z' }
+    ] as any);
+
+    component.toggleAllFiles({ target: { checked: true } } as unknown as Event);
+
+    expect(component.areAllFilesSelected()).toBe(true);
+    expect(component.selectedFileIds().size).toBe(2);
+
+    component.toggleAllFiles({ target: { checked: false } } as unknown as Event);
+
+    expect(component.hasSelectedFiles()).toBe(false);
+    expect(component.selectedFileIds().size).toBe(0);
+  });
+
+  it('should delete selected files and reload list', () => {
+    fileServiceMock.deleteFiles.mockReturnValue(of(void 0));
+    fileServiceMock.getMyFiles.mockReturnValue(of([]));
+    const loadFilesSpy = vi.spyOn(component, 'loadFiles');
+
+    component.selectedFileIds.set(new Set([1, 2]));
+
+    component.deleteSelectedFiles();
+
+    expect(fileServiceMock.deleteFiles).toHaveBeenCalledWith([1, 2]);
+    expect(component.successMessage()).toBe('Fichiers supprimés avec succès.');
+    expect(component.selectedFileIds().size).toBe(0);
+    expect(loadFilesSpy).toHaveBeenCalled();
+  });
+
+  it('should not call deleteFiles when nothing is selected', () => {
+    component.deleteSelectedFiles();
+
+    expect(fileServiceMock.deleteFiles).not.toHaveBeenCalled();
   });
 
   it('should set error message when deleteFile fails', () => {
