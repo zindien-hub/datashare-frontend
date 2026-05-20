@@ -19,7 +19,11 @@ Le frontend couvre principalement :
 - l’authentification ;
 - l’inscription ;
 - l’upload de fichier ;
+- la validation UX des fichiers sélectionnés ;
 - l’historique ;
+- la suppression unitaire et multiple ;
+- la copie du lien de téléchargement ;
+- le formatage lisible des tailles de fichiers ;
 - la navigation entre pages ;
 - l’injection du JWT dans les appels API ;
 - la protection des routes côté client.
@@ -74,23 +78,37 @@ Les principes suivants guident la maintenance du frontend :
 - exécuter les tests automatisés frontend ;
 - vérifier la navigation ;
 - vérifier le comportement des pages impactées ;
+- vérifier les interactions avec le backend si le contrat API change ;
 - mettre à jour la documentation si nécessaire.
 
 ### À chaque correction de bug
 
 - reproduire le problème ;
-- identifier s’il s’agit d’un problème de composant, de service, de routage, d’interceptor, de guard ou de rendu ;
+- identifier s’il s’agit d’un problème de composant, de service, de routage, d’interceptor, de guard, de template ou de rendu ;
 - corriger dans la bonne couche ;
 - revalider manuellement le parcours ;
 - adapter ou ajouter un test si pertinent ;
 - vérifier si la couverture des parcours critiques doit être renforcée.
 
-### Au minimum une fois par sprint ou une fois par mois
+### Maintenance mensuelle
 
 - vérifier les dépendances npm ;
 - lancer un audit de sécurité ;
 - surveiller l’évolution du bundle ;
-- revoir les points de dette technique ouverts.
+- vérifier les résultats de couverture ;
+- relire les points de dette technique ouverts ;
+- vérifier les parcours critiques : login, register, upload, history, download, delete.
+
+### Maintenance immédiate en cas d’alerte critique
+
+Une maintenance immédiate doit être déclenchée en cas de vulnérabilité critique ou élevée concernant :
+
+- Angular ;
+- TypeScript ;
+- RxJS ;
+- le système de build ;
+- Cypress ;
+- les dépendances liées au rendu ou à la sécurité côté navigateur.
 
 ## Procédure de maintenance corrective
 
@@ -121,10 +139,13 @@ Lorsqu’une évolution frontend est ajoutée :
     - le routage ;
     - l’authentification ;
     - l’API ;
+    - les modèles TypeScript ;
     - le rendu responsive ;
     - le lazy loading ;
-3. vérifier si la documentation utilisateur ou technique doit être mise à jour ;
-4. relancer le build ;
+    - les tests unitaires ou E2E ;
+2. vérifier si la documentation utilisateur ou technique doit être mise à jour ;
+3. relancer le build ;
+4. relancer les tests automatisés ;
 5. revalider les pages critiques.
 
 ## Dépendances et mises à jour
@@ -165,13 +186,44 @@ En cas de mise à jour de dépendance :
 1. mettre à jour un package ou un groupe cohérent de packages ;
 2. reconstruire le frontend ;
 3. exécuter les tests unitaires et la couverture ;
-4. vérifier manuellement :
+4. exécuter les tests E2E si les parcours critiques sont impactés ;
+5. vérifier manuellement :
     - login ;
     - register ;
     - upload ;
     - history ;
-5. vérifier les redirections liées au guard et à l’expiration de session ;
-6. vérifier qu’aucune régression responsive n’a été introduite.
+    - download ;
+    - delete ;
+6. vérifier les redirections liées au guard et à l’expiration de session ;
+7. vérifier qu’aucune régression responsive n’a été introduite.
+
+### Automatisation envisagée
+
+Pour une mise en production, un outil comme Dependabot ou Renovate devra être activé afin de proposer automatiquement des pull requests de mise à jour des dépendances.
+
+Les pull requests automatiques devront être validées par :
+
+- build de production ;
+- tests unitaires ;
+- couverture ;
+- tests E2E ;
+- audit de sécurité ;
+- revue humaine avant merge.
+
+## Matrice de risques techniques
+
+| Zone / dépendance | Risque principal | Impact potentiel | Mesure de maintenance |
+|---|---|---|---|
+| Angular | Régression framework ou breaking change | Rendu cassé, routage dégradé ou build impossible | Mise à jour contrôlée, build, tests unitaires et E2E |
+| Angular Router | Mauvaise protection ou redirection incorrecte | Accès non authentifié à une page protégée ou mauvaise UX | Tests AuthGuard, tests navigation, vérification manuelle |
+| HttpClient / Interceptor | Header JWT manquant ou mauvaise gestion du `401` | Requêtes refusées ou session non nettoyée | Tests interceptor, vérification login/logout/session expirée |
+| AuthService | Mauvaise gestion du token | Session incohérente ou utilisateur bloqué | Tests unitaires sur token, logout et état connecté |
+| Upload | Fichier invalide envoyé au backend | Mauvaise UX ou appels backend inutiles | Validation UX, tests fichiers vides/taille/type |
+| History | Mauvaise sélection ou suppression multiple incorrecte | Suppression non souhaitée ou liste incohérente | Tests sélection, suppression groupée, rechargement liste |
+| Clipboard API | Copie du lien indisponible ou échouée | Mauvaise expérience utilisateur | Messages d’erreur, tests fallback |
+| LocalStorage | Exposition du JWT en cas de XSS | Risque de vol de token | Durcissement production envisagé avec cookie HttpOnly |
+| Responsive | Interface dégradée sur mobile | Démonstration ou usage mobile moins fluide | Tests manuels, audit Lighthouse, corrections CSS |
+| Dépendances npm | Vulnérabilités ou incompatibilités | Risque sécurité ou build instable | `npm audit`, mises à jour contrôlées, Dependabot/Renovate |
 
 ## Zones sensibles du frontend
 
@@ -196,8 +248,13 @@ Les zones suivantes doivent être surveillées en priorité :
 ### Upload et historique
 
 - état visuel après soumission ;
+- validation UX des fichiers avant upload ;
+- formatage des tailles de fichiers ;
 - rendu asynchrone ;
 - rafraîchissement de l’historique ;
+- sélection multiple ;
+- suppression groupée ;
+- copie du lien public ;
 - lisibilité de la page history sur mobile.
 
 ### Performance et rendu
@@ -213,7 +270,9 @@ Les points suivants restent des sujets de maintenance :
 
 - la couverture de tests frontend progresse mais reste partielle à l’échelle de l’ensemble des templates et comportements visuels ;
 - la performance mobile est inférieure à la performance desktop ;
-- les composants critiques sont désormais mieux couverts, mais les scénarios UI avancés et certains cas limites restent à renforcer ;
+- la pagination de l’historique n’est pas encore implémentée ;
+- le stockage du JWT en `localStorage` reste acceptable pour le MVP mais devra être durci pour une mise en production ;
+- les scénarios UI avancés et certains cas limites restent à renforcer ;
 - l’audit Lighthouse n’est pas industrialisé ;
 - l’analyse de performance des routes protégées constitue encore un point faible du projet :
   elle dépend d’audits manuels en session authentifiée et ne bénéficie pas encore d’une automatisation fiable.
@@ -236,18 +295,22 @@ Avant de fusionner une évolution frontend, vérifier au minimum :
 - le projet build correctement ;
 - `npm test` passe ;
 - `npm run test:coverage` a été vérifié si la modification touche le comportement applicatif ou les tests ;
-- les tests end-to-end sont relancés si les parcours critiques sont impactés ;
+- `npm run cy:run` passe si les parcours critiques sont impactés ;
 - les pages impactées ont été testées manuellement ;
 - le comportement responsive n’est pas dégradé ;
-- les éventuels impacts documentation ont été traités.
+- les éventuels impacts documentation ont été traités ;
+- les changements de contrat API sont alignés avec le backend ;
+- les changements de dépendances sont accompagnés d’un audit ou d’une vérification de sécurité.
 
 ## Conclusion
 
-Le frontend DataShare dispose d’une base maintenable pour un MVP, avec une architecture claire, une séparation des responsabilités et un socle de tests frontend plus solide.
+Le frontend DataShare dispose d’une base maintenable pour un MVP, avec une architecture claire, une séparation des responsabilités, une gestion centralisée de l’authentification et un socle de tests frontend renforcé.
 
 Les priorités actuelles sont :
 
 - poursuivre le renforcement de la couverture de tests ;
 - améliorer les performances mobiles ;
+- préparer la pagination de l’historique ;
 - surveiller l’évolution du bundle ;
-- conserver une cohérence entre architecture, sécurité, responsive et documentation.
+- durcir la gestion du token pour un usage production ;
+- conserver une cohérence entre architecture, sécurité, responsive, contrat API et documentation.
