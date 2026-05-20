@@ -35,6 +35,7 @@ describe('FileService', () => {
     const mockResponse: FileUploadResponse = {
       id: 1,
       originalName: 'test.pdf',
+      size: 1024,
       downloadToken: 'token-123',
       downloadUrl: '/files/token-123',
       expiresAt: '2026-05-16T10:00:00Z'

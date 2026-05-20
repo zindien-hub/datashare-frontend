@@ -19,6 +19,15 @@ export class Upload {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  private readonly maxFileSizeBytes = 5 * 1024 * 1024;
+
+  private readonly allowedContentTypes = [
+    'image/png',
+    'image/jpeg',
+    'application/pdf',
+    'text/plain'
+  ];
+
   selectedFile = signal<File | null>(null);
   errorMessage = signal('');
   successMessage = signal('');
@@ -29,9 +38,25 @@ export class Upload {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
 
-    this.selectedFile.set(file);
     this.errorMessage.set('');
     this.successMessage.set('');
+    this.uploadResponse.set(null);
+
+    if (!file) {
+      this.selectedFile.set(null);
+      return;
+    }
+
+    const validationError = this.validateSelectedFile(file);
+
+    if (validationError) {
+      this.selectedFile.set(null);
+      this.errorMessage.set(validationError);
+      input.value = '';
+      return;
+    }
+
+    this.selectedFile.set(file);
   }
 
   onSubmit(fileInput?: HTMLInputElement): void {
@@ -41,6 +66,19 @@ export class Upload {
 
     if (!this.selectedFile()) {
       this.errorMessage.set('Veuillez sélectionner un fichier.');
+      return;
+    }
+
+    const validationError = this.validateSelectedFile(this.selectedFile()!);
+
+    if (validationError) {
+      this.errorMessage.set(validationError);
+      this.selectedFile.set(null);
+
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
       return;
     }
 
@@ -70,8 +108,36 @@ export class Upload {
       });
   }
 
+  formatFileSize(size: number): string {
+    if (size < 1024) {
+      return `${size} o`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} Ko`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  private validateSelectedFile(file: File): string | null {
+    if (file.size === 0) {
+      return 'Le fichier sélectionné est vide.';
+    }
+
+    if (file.size > this.maxFileSizeBytes) {
+      return 'Le fichier dépasse la taille maximale autorisée de 5 Mo.';
+    }
+
+    if (!this.allowedContentTypes.includes(file.type)) {
+      return 'Format non autorisé. Formats acceptés : PNG, JPG, PDF, TXT.';
+    }
+
+    return null;
   }
 }

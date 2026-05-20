@@ -93,7 +93,7 @@
                 </td>
                 <td class="file-name">{{ file.originalName }}</td>
                 <td>{{ file.contentType || 'n/a' }}</td>
-                <td>{{ file.size }} octets</td>
+                <td>{{ formatFileSize(file.size) }}</td>
                 <td>{{ file.createdAt | date:'short' }}</td>
                 <td>{{ file.expiresAt | date:'short' }}</td>
                 <td>
