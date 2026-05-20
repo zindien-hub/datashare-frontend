@@ -70,6 +70,12 @@ describe('History', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should format file sizes', () => {
+    expect(component.formatFileSize(512)).toBe('512 o');
+    expect(component.formatFileSize(1536)).toBe('1.5 Ko');
+    expect(component.formatFileSize(2 * 1024 * 1024)).toBe('2.0 Mo');
+  });
+
   it('should load files on init', () => {
     const files: FileListItemResponse[] = [
       {

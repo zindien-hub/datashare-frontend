@@ -55,7 +55,8 @@ describe('Upload', () => {
     const file = new File(['content'], 'test.txt', { type: 'text/plain' });
     const event = {
       target: {
-        files: [file]
+        files: [file],
+        value: 'C:\\fakepath\\test.txt'
       }
     } as unknown as Event;
 
@@ -78,6 +79,68 @@ describe('Upload', () => {
     expect(component.selectedFile()).toBeNull();
   });
 
+  it('should reject empty file on file input change', () => {
+    const file = new File([], 'empty.txt', { type: 'text/plain' });
+    const input = {
+      files: [file],
+      value: 'C:\\fakepath\\empty.txt'
+    };
+
+    const event = {
+      target: input
+    } as unknown as Event;
+
+    component.onFileSelected(event);
+
+    expect(component.selectedFile()).toBeNull();
+    expect(component.errorMessage()).toBe('Le fichier sélectionné est vide.');
+    expect(input.value).toBe('');
+  });
+
+  it('should reject files larger than 5 MB on file input change', () => {
+    const file = new File(['content'], 'big-file.pdf', { type: 'application/pdf' });
+
+    Object.defineProperty(file, 'size', {
+      value: 6 * 1024 * 1024
+    });
+
+    const input = {
+      files: [file],
+      value: 'C:\\fakepath\\big-file.pdf'
+    };
+
+    const event = {
+      target: input
+    } as unknown as Event;
+
+    component.onFileSelected(event);
+
+    expect(component.selectedFile()).toBeNull();
+    expect(component.errorMessage()).toBe('Le fichier dépasse la taille maximale autorisée de 5 Mo.');
+    expect(input.value).toBe('');
+  });
+
+  it('should reject unsupported file types on file input change', () => {
+    const file = new File(['content'], 'script.exe', {
+      type: 'application/x-msdownload'
+    });
+
+    const input = {
+      files: [file],
+      value: 'C:\\fakepath\\script.exe'
+    };
+
+    const event = {
+      target: input
+    } as unknown as Event;
+
+    component.onFileSelected(event);
+
+    expect(component.selectedFile()).toBeNull();
+    expect(component.errorMessage()).toBe('Format non autorisé. Formats acceptés : PNG, JPG, PDF, TXT.');
+    expect(input.value).toBe('');
+  });
+
   it('should not submit when no file is selected', () => {
     component.onSubmit();
 
@@ -85,11 +148,29 @@ describe('Upload', () => {
     expect(component.errorMessage()).toBe('Veuillez sélectionner un fichier.');
   });
 
+  it('should not submit invalid selected file', () => {
+    const file = new File(['content'], 'script.exe', {
+      type: 'application/x-msdownload'
+    });
+    const input = document.createElement('input');
+
+    component.selectedFile.set(file);
+    input.value = 'C:\\fakepath\\script.exe';
+
+    component.onSubmit(input);
+
+    expect(fileServiceMock.upload).not.toHaveBeenCalled();
+    expect(component.selectedFile()).toBeNull();
+    expect(component.errorMessage()).toBe('Format non autorisé. Formats acceptés : PNG, JPG, PDF, TXT.');
+    expect(input.value).toBe('');
+  });
+
   it('should upload file successfully', () => {
     const file = new File(['content'], 'test.txt', { type: 'text/plain' });
     const response = {
       id: 1,
       originalName: 'test.txt',
+      size: 120,
       downloadToken: 'token',
       downloadUrl: '/files/test',
       expiresAt: '2026-05-15T20:00:00Z'
@@ -137,6 +218,12 @@ describe('Upload', () => {
 
     expect(component.errorMessage()).toBe('Erreur lors de l’upload du fichier.');
     expect(component.isSubmitting()).toBe(false);
+  });
+
+  it('should format file sizes', () => {
+    expect(component.formatFileSize(512)).toBe('512 o');
+    expect(component.formatFileSize(1536)).toBe('1.5 Ko');
+    expect(component.formatFileSize(2 * 1024 * 1024)).toBe('2.0 Mo');
   });
 
   it('should logout and navigate to login', () => {

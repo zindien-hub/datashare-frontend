@@ -137,6 +137,18 @@ export class History implements OnInit {
       });
   }
 
+  formatFileSize(size: number): string {
+    if (size < 1024) {
+      return `${size} o`;
+    }
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} Ko`;
+    }
+
+    return `${(size / (1024 * 1024)).toFixed(1)} Mo`;
+  }
+
   buildDownloadLink(downloadUrl: string): string {
     return `${environment.backendBaseUrl}${downloadUrl}`;
   }
