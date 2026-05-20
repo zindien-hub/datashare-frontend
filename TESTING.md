@@ -5,12 +5,16 @@
 Ce document décrit l’état actuel des vérifications réalisées sur le frontend Angular de DataShare.
 
 L’objectif est de sécuriser les parcours critiques de l’interface :
+
 - authentification ;
 - protection des routes ;
 - gestion de session ;
 - upload de fichier ;
+- validation côté interface des fichiers sélectionnés ;
 - affichage de l’historique ;
-- suppression d’un fichier ;
+- formatage lisible des tailles de fichiers ;
+- suppression unitaire d’un fichier ;
+- suppression multiple de fichiers ;
 - génération et copie du lien de téléchargement.
 
 ## Stratégie retenue
@@ -19,11 +23,14 @@ L’objectif est de sécuriser les parcours critiques de l’interface :
 
 - des tests unitaires sur le socle applicatif, les services, l’interceptor, le guard et les pages critiques ;
 - des tests end-to-end Cypress sur les parcours critiques du MVP ;
-- des validations manuelles complémentaires sur l’interface, les messages utilisateur et le responsive.
+- des validations manuelles complémentaires sur l’interface, les messages utilisateur, le responsive et les comportements visuels.
 
 Cette stratégie permet de couvrir à la fois :
+
 - le comportement local des briques frontend ;
 - les parcours utilisateur de bout en bout ;
+- la gestion des erreurs utilisateur ;
+- les validations UX avant appel backend ;
 - les vérifications visuelles et fonctionnelles nécessaires à un MVP.
 
 ## Outils
@@ -146,10 +153,14 @@ Couverture actuelle des tests unitaires :
 ### Page Upload
 
 - création du composant ;
-- sélection d’un fichier ;
+- sélection d’un fichier valide ;
 - gestion du cas sans fichier sélectionné ;
+- rejet d’un fichier vide avant appel backend ;
+- rejet d’un fichier dépassant la taille maximale autorisée ;
+- rejet d’un type MIME non autorisé ;
 - upload réussi ;
 - stockage de la réponse d’upload ;
+- affichage de la taille du fichier dans un format lisible ;
 - remise à zéro du champ fichier après succès ;
 - gestion du message d’erreur backend ;
 - gestion du message d’erreur par défaut ;
@@ -184,7 +195,7 @@ Parcours couverts :
 À ce stade :
 
 - **9 fichiers de tests unitaires frontend**
-- **67 tests unitaires frontend au vert**
+- **73 tests unitaires frontend au vert**
 - **5 specs Cypress**
 - **9 tests E2E au vert**
 
@@ -198,10 +209,10 @@ npm run test:coverage
 
 Résultat actuel :
 
-- **Statements : `73 %`**
-- **Branches : `70.79 %`**
-- **Functions : `80.55 %`**
-- **Lines : `80.22 %`**
+- **Statements : `73.52 %`**
+- **Branches : `73.21 %`**
+- **Functions : `81.33 %`**
+- **Lines : `81.45 %`**
 
 ### Points actuellement couverts à 100 %
 
@@ -210,14 +221,16 @@ Résultat actuel :
 - `app/core/guard/auth.guard.ts`
 - `app/core/interceptor/auth.interceptor.ts`
 - `app/pages/history/history.ts`
+- `app/pages/upload/upload.ts`
 
 ### Points encore partiellement couverts
 
 La couverture restante concerne principalement :
 
 - les templates HTML des pages ;
-- certains embranchements secondaires dans `login.ts`, `register.ts` et `upload.ts` ;
-- les comportements visuels liés au rendu des composants.
+- certains embranchements secondaires dans `login.ts` et `register.ts` ;
+- les comportements visuels liés au rendu des composants ;
+- certains scénarios d’accessibilité et de responsive qui restent vérifiés manuellement.
 
 ## Vérifications manuelles réalisées
 
@@ -227,43 +240,63 @@ Les scénarios suivants ont été validés manuellement dans le navigateur :
 
 - accès à la page `/register` ;
 - soumission du formulaire d’inscription ;
-- redirection vers la page de connexion.
+- redirection vers la page de connexion ;
+- affichage des messages d’erreur en cas de formulaire invalide ou d’email déjà existant.
 
 ### 2. Connexion
 
 - accès à la page `/login` ;
 - soumission du formulaire de connexion ;
-- récupération et stockage du JWT dans le localStorage.
+- récupération et stockage du JWT dans le localStorage ;
+- affichage d’un message en cas d’identifiants invalides.
 
 ### 3. Protection des routes
 
 - refus d’accès aux pages protégées sans authentification ;
 - redirection vers `/login` ;
-- accès autorisé après connexion.
+- conservation de la route d’origine via `returnUrl` ;
+- accès autorisé après connexion ;
+- déconnexion et retour vers la page de connexion.
 
 ### 4. Upload
 
 - accès à `/upload` ;
-- sélection d’un fichier ;
+- sélection d’un fichier valide ;
+- rejet côté interface d’un fichier vide ;
+- rejet côté interface d’un fichier trop volumineux ;
+- rejet côté interface d’un type MIME non autorisé ;
 - soumission du formulaire ;
 - affichage du résultat d’upload ;
+- affichage de la taille du fichier dans un format lisible ;
 - remise à zéro correcte de l’état visuel après soumission.
 
 ### 5. Historique
 
 - accès à `/history` ;
 - chargement de la liste des fichiers de l’utilisateur connecté ;
-- affichage des métadonnées principales.
+- affichage des métadonnées principales ;
+- affichage lisible des tailles en o / Ko / Mo ;
+- retour vers la page d’upload.
 
-### 6. Téléchargement
+### 6. Téléchargement et copie du lien
 
+- copie du lien de téléchargement depuis l’historique ;
+- affichage du message de succès après copie ;
 - clic sur le lien de téléchargement depuis l’historique ;
 - ouverture correcte du lien public renvoyé par le backend.
 
-### 7. Suppression
+### 7. Suppression unitaire
 
 - clic sur l’action Supprimer depuis l’historique ;
 - mise à jour de la liste après suppression ;
+- affichage du message de succès.
+
+### 8. Suppression multiple
+
+- sélection de plusieurs fichiers dans l’historique ;
+- déclenchement de la suppression groupée ;
+- mise à jour de la liste après suppression ;
+- remise à zéro de la sélection ;
 - affichage du message de succès.
 
 ## Limites actuelles
@@ -273,7 +306,9 @@ Le frontend dispose désormais d’un socle de tests automatisés plus complet, 
 - la couverture des templates HTML reste partielle ;
 - certains scénarios limites UI restent surtout couverts par validation manuelle ;
 - les cas d’erreur avancés côté interface peuvent encore être enrichis ;
-- le responsive et les performances frontend restent vérifiés principalement par audit et validation manuelle.
+- les scénarios d’accessibilité restent à auditer plus finement ;
+- le responsive et les performances frontend restent vérifiés principalement par audit et validation manuelle ;
+- la pagination de l’historique n’est pas encore implémentée.
 
 ## Améliorations prévues
 
@@ -282,6 +317,8 @@ Les améliorations envisagées sont :
 - renforcer la couverture des templates et des interactions DOM ;
 - compléter les scénarios unitaires sur les branches secondaires encore non couvertes ;
 - enrichir les scénarios E2E sur les cas d’erreur et comportements limites ;
+- ajouter des scénarios autour de la future pagination de l’historique ;
+- renforcer les vérifications d’accessibilité ;
 - consolider le suivi de couverture frontend dans la documentation projet ;
 - maintenir l’alignement entre les tests unitaires Vitest, les tests E2E Cypress et les comportements réellement livrés.
 

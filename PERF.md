@@ -13,12 +13,15 @@ L’objectif est d’évaluer le comportement du frontend dans un contexte de d�
 
 Trois types de mesures ont été retenus :
 
-- build Angular avec `ng build`
-- comparaison avant / après mise en place du lazy loading par page
+- build Angular avec `npm run build` ;
+- comparaison avant / après mise en place du lazy loading par page ;
 - audits Lighthouse réalisés manuellement dans Chrome DevTools sur :
   - `/login`
+  - `/register`
   - `/upload`
-  - `/history`
+  - `/history`.
+
+Les pages `/upload` et `/history` étant protégées, les audits correspondants sont réalisés avec une session utilisateur valide.
 
 ## Résultats du build
 
@@ -48,25 +51,30 @@ chunk-6FEH4OUJ.js   | register      |   4.10 kB |                 1.43 kB
 chunk-X4G6WJQS.js   | login         |   3.58 kB |                 1.32 kB
 ```
 
-## Résultat observé :
+## Résultat observé
 
-total initial : 248.90 kB
-taille estimée transférée : 68.52 kB
-le bundle principal main est réduit à 1.53 kB
-les pages sont désormais chargées à la demande sous forme de chunks séparés
-Lazy chunks observés
-history : 5.76 kB
-upload : 4.65 kB
-register : 4.10 kB
-login : 3.58 kB
+Après mise en place du lazy loading :
+
+- total initial : **248.90 kB** ;
+- taille estimée transférée : **68.52 kB** ;
+- bundle principal `main` réduit à **1.53 kB** ;
+- pages chargées à la demande sous forme de chunks séparés.
+
+Lazy chunks observés :
+
+- `history` : **5.76 kB** ;
+- `upload` : **4.65 kB** ;
+- `register` : **4.10 kB** ;
+- `login` : **3.58 kB**.
 
 ## Effet observé
 
 Le passage au lazy loading par page a permis :
 
-- de réduire le bundle initial de 301.15 kB à 248.90 kB
-- de réduire le transfert estimé de 78.28 kB à 68.52 kB
-- de mieux répartir le chargement du frontend entre les différentes routes
+- de réduire le bundle initial de **301.15 kB** à **248.90 kB** ;
+- de réduire le transfert estimé de **78.28 kB** à **68.52 kB** ;
+- de mieux répartir le chargement du frontend entre les différentes routes ;
+- de limiter le coût initial du chargement des pages protégées, notamment `upload` et `history`.
 
 ## Résultats Lighthouse
 
@@ -164,7 +172,8 @@ Ces résultats montrent que :
 - en profil desktop, le thread principal n’est pas bloqué de manière significative (`TBT = 0 ms`) ;
 - les scores Lighthouse desktop sont bons, avec une performance comprise entre **82 et 85** ;
 - les scores Lighthouse mobile sont plus faibles, compris entre **57 et 58**, avec des temps de rendu sensiblement plus élevés ;
-- les ajustements responsive ont amélioré l’exploitabilité de l’interface sur petits écrans, en particulier sur la page `history`.
+- les ajustements responsive ont amélioré l’exploitabilité de l’interface sur petits écrans, en particulier sur la page `history` ;
+- les dernières évolutions UX, comme la validation frontend des fichiers et l’affichage lisible des tailles, n’ont pas introduit de signal de dégradation bloquante sur le périmètre testé.
 
 ## Interprétation
 
@@ -174,7 +183,8 @@ Ces résultats montrent que :
 - la structure du routage a été améliorée avec un chargement à la demande ;
 - l’expérience desktop apparaît satisfaisante sur les pages principales ;
 - l’interface mobile est désormais plus cohérente visuellement, mais les audits Lighthouse montrent que la performance mobile reste une marge d’amélioration ;
-- aucune alerte bloquante n’a été relevée, mais un écart net subsiste entre les profils desktop et mobile.
+- aucune alerte bloquante n’a été relevée, mais un écart net subsiste entre les profils desktop et mobile ;
+- les améliorations UX récentes restent compatibles avec le périmètre de performance actuel.
 
 Le frontend apparaît donc adapté au périmètre actuel du MVP, avec une base saine côté desktop et une marge d’optimisation encore réelle côté mobile.
 
@@ -185,16 +195,21 @@ Les mesures actuelles restent limitées :
 - audits réalisés en environnement local ;
 - absence d’automatisation Lighthouse complète sur les routes protégées ;
 - comparaison réalisée via les profils Lighthouse desktop et mobile, mais sans campagne sur plusieurs appareils physiques ;
-- absence de suivi détaillé des Web Vitals dans le temps.
+- absence de suivi détaillé des Web Vitals dans le temps ;
+- absence de mesure automatisée après chaque merge ;
+- absence de test spécifique sur un historique volumineux, la pagination n’étant pas encore implémentée.
 
 Ces résultats doivent donc être interprétés comme une évaluation locale sérieuse du frontend, et non comme un audit de performance complet en conditions réelles de production.
 
 ## Optimisations et approfondissements possibles
 
-Les améliorations envisagées sont :
+Les améliorations envisageables sont :
 
 - surveiller l’évolution de la taille du bundle dans le temps ;
 - approfondir l’optimisation des performances mobiles ;
 - suivre plus systématiquement les Core Web Vitals ;
+- automatiser Lighthouse dans une étape CI ou via script dédié ;
+- tester le comportement de la page `history` avec un volume important de fichiers ;
+- mettre en place une pagination côté interface lorsque l’API backend sera paginée ;
 - conserver le lazy loading comme base de croissance du frontend ;
 - réévaluer la stratégie de découpage si le nombre de pages ou de composants augmente.
