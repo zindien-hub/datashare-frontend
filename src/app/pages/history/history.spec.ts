@@ -7,7 +7,6 @@ import { History } from './history';
 import { FileService } from '../../core/service/file.service';
 import { AuthService } from '../../core/service/auth.service';
 import { FileListItemResponse } from '../../core/models/file-list-item-response.model';
-import { environment } from '../../../environments/environment';
 
 describe('History', () => {
   let component: History;
@@ -274,10 +273,10 @@ describe('History', () => {
     );
   });
 
-  it('should build download link', () => {
-    const result = component.buildDownloadLink('/files/1/download');
+  it('should build download link from current frontend origin', () => {
+    const result = component.buildDownloadLink('/download/token-123');
 
-    expect(result).toBe(`${environment.backendBaseUrl}/files/1/download`);
+    expect(result).toBe(`${window.location.origin}/download/token-123`);
   });
 
   it('should navigate to upload page', () => {
@@ -301,7 +300,7 @@ describe('History', () => {
       configurable: true
     });
 
-    component.copyLinkToClipboard('/files/test');
+    component.copyLinkToClipboard('/download/token-123');
 
     expect(component.errorMessage()).toBe(
       'Copie non supportée sur ce navigateur.'
@@ -314,7 +313,7 @@ describe('History', () => {
     });
   });
 
-  it('should copy link to clipboard successfully', async () => {
+  it('should copy full frontend download link to clipboard successfully', async () => {
     vi.useFakeTimers();
 
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -325,11 +324,11 @@ describe('History', () => {
       configurable: true
     });
 
-    component.copyLinkToClipboard('/files/test');
+    component.copyLinkToClipboard('/download/token-123');
     await Promise.resolve();
 
     expect(writeText).toHaveBeenCalledWith(
-      `${environment.backendBaseUrl}/files/test`
+      `${window.location.origin}/download/token-123`
     );
     expect(component.successMessage()).toBe('Lien copié avec succès!');
     expect(component.errorMessage()).toBe('');
@@ -357,7 +356,7 @@ describe('History', () => {
       configurable: true
     });
 
-    component.copyLinkToClipboard('/files/test');
+    component.copyLinkToClipboard('/download/token-123');
     await Promise.resolve();
     await Promise.resolve();
 
