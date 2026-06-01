@@ -1,27 +1,31 @@
 <main class="page">
+  <header class="app-header">
+    <strong class="brand">DataShare</strong>
+
+    <div class="app-header-actions">
+      <button
+        type="button"
+        class="back-upload-button"
+        (click)="goToUpload()"
+        title="Retourner à la page d'upload"
+      >
+        Retour à l'upload
+      </button>
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="onLogout()"
+        title="Se déconnecter de votre compte"
+      >
+        Se déconnecter
+      </button>
+    </div>
+  </header>
+
   <section class="card">
     <div class="header">
       <h1>Historique des fichiers</h1>
-
-      <div class="header-buttons">
-        <button
-          type="button"
-          class="back-upload-button"
-          (click)="goToUpload()"
-          title="Retourner à la page d'upload"
-        >
-          Retour à l'upload
-        </button>
-
-        <button
-          type="button"
-          class="logout-button"
-          (click)="onLogout()"
-          title="Se déconnecter de votre compte"
-        >
-          Se déconnecter
-        </button>
-      </div>
     </div>
 
     @if (successMessage()) {
